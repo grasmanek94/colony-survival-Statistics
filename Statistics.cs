@@ -26,6 +26,7 @@ namespace grasmanek94.Statistics
                 Stats:
                     - Production (Output)
                     - Consumption (Input)
+                    - Requirement
                     - Worker amount
                     - Amount of farms currently producing
                     - Amount of crafting places currently producing
@@ -48,6 +49,8 @@ namespace grasmanek94.Statistics
             //  public void AddEnumerable<T>(T toAddItems) where T : IEnumerable<InventoryItem>
             //  public bool TryRemoveFood(ref float currentFood, float desiredFoodAddition)
             //  public void Clear()
+            // AreaJobTracker
+            // BlockJobInstance??
 
             data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
             data.menu.Items.Add(new Label(new LabelData("Blablabla", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
