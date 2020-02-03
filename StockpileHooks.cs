@@ -42,7 +42,6 @@ namespace grasmanek94.Statistics
 
 	[HarmonyPatch(typeof(Stockpile))]
 	[HarmonyPatch("TryRemoveFood")]
-	[HarmonyPatch(new Type[] { typeof(float), typeof(float) })]
 	class StockpileHookTryRemoveFood
 	{
 		static void Prefix(Stockpile __instance, ref float currentFood, float desiredFoodAddition)

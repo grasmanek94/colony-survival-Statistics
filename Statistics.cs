@@ -10,6 +10,7 @@ using NPC;
 using System;
 using Pipliz.JSON;
 using Harmony;
+using Pipliz;
 
 namespace grasmanek94.Statistics
 {
@@ -46,9 +47,9 @@ namespace grasmanek94.Statistics
                 data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
 
                 data.menu.Items.Add(new Label(new LabelData("Last " + span + " average:", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Created / Used: " + stat.AverageProduced.ToString() + " / " + stat.AverageConsumed.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Producers / Consumers: " + stat.AverageProducers.ToString() + " / " + stat.AverageConsumers.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Inventory + / -: " + stat.AverageInventoryAdded.ToString() + " / " + stat.AverageInventoryRemoved.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Created " + stat.AverageProduced.ToString() + ", Used " + stat.AverageConsumed.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData(stat.AverageProducers.ToString() + " producers, " + stat.AverageConsumers.ToString() + " consumers" , TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Stock " + stat.AverageInventoryAdded.ToString() + " added, " + stat.AverageInventoryRemoved.ToString() + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             }
         }
 
@@ -118,8 +119,16 @@ namespace grasmanek94.Statistics
         }
 
         [ModCallback(EModCallbackType.OnNPCGathered, "OnNPCGathered")]
-        static void OnNPCGathered(IJob job, Vector3Int pos, List<ItemTypes.ItemTypeDrops> items)
+        static void OnNPCGathered(IJob job, Pipliz.Vector3Int pos, List<ItemTypes.ItemTypeDrops> items)
         {
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    Log.Write("OnNPCGathered {0} {1}", item.Type, item.Amount);
+                }
+            }
+
             if (job == null || job.NPC == null || job.NPC.Colony == null || items == null)
             {
                 return;
@@ -138,6 +147,14 @@ namespace grasmanek94.Statistics
         [ModCallback(EModCallbackType.OnNPCCraftedRecipe, "OnNPCCraftedRecipe")]
         static void OnNPCCraftedRecipe(IJob job, Recipe recipe, List<RecipeResult> result)
         {
+            if (result != null)
+            {
+                foreach (var item in result)
+                {
+                    Log.Write("OnNPCCraftedRecipe {0} {1}", item.Type, item.Amount);
+                }
+            }
+
             if (job == null || job.NPC == null || job.NPC.Colony == null)
             {
                 return;

@@ -3,3 +3,4 @@ This Colony Survival mod adds additional statistics like consumption and product
 Mod compatibility:   
 
 - `0.7.1`
+- `0.7.2`
