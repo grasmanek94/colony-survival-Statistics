@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace grasmanek94.Statistics
 {
@@ -20,7 +21,7 @@ namespace grasmanek94.Statistics
             } 
         }
 
-        private int[] nextHoursTable;
+        private int[] nextAverages;
 
         private double GamePeriodLengthInMinutes { get; set; }
 
@@ -51,15 +52,14 @@ namespace grasmanek94.Statistics
             }
             CurrentStatistics = timedItemStatistics[CurrentPeriod];
 
-            double period_hours = GamePeriodLengthInMinutes / 60.0;
-            nextHoursTable = new int[]
+            nextAverages = new int[]
             {
-                (int)(1 * period_hours),
-                // (int)(6 * period_hours),
-                // (int)(12 * period_hours),
-                (int)(24 * period_hours),
-                // (int)(48 * period_hours),
-                (int)(MaxPeriods * period_hours)
+                1,
+                // 6,
+                // 12,
+                24
+                // 48,
+                //MaxPeriods
             };
         }
 
@@ -91,32 +91,32 @@ namespace grasmanek94.Statistics
             CurrentStatistics.Consume(amount);
         }
 
-        public override void AddProducer(int producers = 1)
+        public override void AddProducer(int entity)
         {
             PerformPeriodUpdate();
             Dirty = true;
-            CurrentStatistics.AddProducer(producers);
+            CurrentStatistics.AddProducer(entity);
         }
 
-        public override void AddConsumer(int consumers = 1)
+        public override void AddConsumer(int entity)
         {
             PerformPeriodUpdate();
             Dirty = true;
-            CurrentStatistics.AddConsumer(consumers);
+            CurrentStatistics.AddConsumer(entity);
         }
 
-        public override void RemoveProducer(int producers = 1)
+        public override void RemoveProducer(int entity)
         {
             PerformPeriodUpdate();
             Dirty = true;
-            CurrentStatistics.RemoveProducer(producers);
+            CurrentStatistics.RemoveProducer(entity);
         }
 
-        public override void RemoveConsumer(int consumers = 1)
+        public override void RemoveConsumer(int entity)
         {
             PerformPeriodUpdate();
             Dirty = true;
-            CurrentStatistics.RemoveConsumer(consumers);
+            CurrentStatistics.RemoveConsumer(entity);
         }
 
         public override void AddInventory(int amount = 1)
@@ -178,14 +178,13 @@ namespace grasmanek94.Statistics
 
             int lastPeriods = 0;
 
-            int nextHours = 0;
+            int nextAverage = 0;
 
-            while (nextHours < nextHoursTable.Length)
+            while (nextAverage < nextAverages.Length)
             {
-                int hours = PeriodsToGameHours(stats.Periods);
-                if(nextHoursTable[nextHours] >= hours)
+                if(stats.Periods >= nextAverages[nextAverage])
                 {
-                    nextHours++;
+                    ++nextAverage;
                     averages.Add(new ItemStatistics(stats));
                 }
 

@@ -66,6 +66,7 @@
     <Compile Include="ProducerConsumer.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StockpileHooks.cs" />
     <Compile Include="TimedItemStatistics.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
   </ItemGroup>

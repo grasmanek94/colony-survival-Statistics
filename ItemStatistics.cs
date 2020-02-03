@@ -1,7 +1,13 @@
-﻿namespace grasmanek94.Statistics
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace grasmanek94.Statistics
 {
     public class ItemStatistics : ProducerConsumer
     {
+        private HashSet<int> _producers;
+        private HashSet<int> _consumers;
+
         public int Periods { get; private set; }
 
         public int Produced { get; private set; }
@@ -21,32 +27,44 @@
             Consumed += amount;
         }
 
-        public override void AddProducer(int producers = 1)
+        public override void AddProducer(int entity)
         {
-            Producers += producers;
+            if(_producers.Add(entity))
+            {
+                ++Producers;
+            }
         }
 
-        public override void AddConsumer(int consumers = 1)
+        public override void AddConsumer(int entity)
         {
-            Consumers += consumers;
+            if(_consumers.Add(entity))
+            {
+                ++Consumers;
+            }
         }
 
-        public override void RemoveProducer(int producers = 1)
+        public override void RemoveProducer(int entity)
         {
-            Producers -= producers;
+            if(_producers.Remove(entity))
+            {
+                --Producers;
+            }
         }
 
-        public override void RemoveConsumer(int consumers = 1)
+        public override void RemoveConsumer(int entity)
         {
-            Consumers += consumers;
+            if(_consumers.Remove(entity))
+            {
+                --Consumers;
+            }
         }
 
-        public override void AddInventory(int amount = 1)
+        public override void AddInventory(int amount)
         {
             InventoryAdded += amount;
         }
 
-        public override void RemoveInventory(int amount = 1)
+        public override void RemoveInventory(int amount)
         {
             InventoryRemoved += amount;
         }
@@ -58,34 +76,46 @@
 
         public void Reset()
         {
+            _producers = new HashSet<int>();
+            _consumers = new HashSet<int>();
+
             Produced = 0;
             Consumed = 0;
             Producers = 0;
             Consumers = 0;
             InventoryAdded = 0;
             InventoryRemoved = 0;
+
             Periods = 1;
         }
 
         public ItemStatistics(int produced, int consumed, int producers, int consumers, int inventoryAdded, int inventoryRemoved, int periods)
         {
+            _producers = new HashSet<int>();
+            _consumers = new HashSet<int>();
+
             Produced = produced;
             Consumed = consumed;
             Producers = producers;
             Consumers = consumers;
             InventoryAdded = inventoryAdded;
             InventoryRemoved = inventoryRemoved;
+
             Periods = periods;
         }
 
         public ItemStatistics(ItemStatistics other)
         {
+            _producers = other._producers;
+            _consumers = other._consumers;
+
             Produced = other.Produced;
             Consumed = other.Consumed;
             Producers = other.Producers;
             Consumers = other.Consumers;
             InventoryAdded = other.InventoryAdded;
             InventoryRemoved = other.InventoryRemoved;
+
             Periods = other.Periods;
         }
 
@@ -114,6 +144,12 @@
                 a.InventoryRemoved + b.InventoryRemoved,
                 a.Periods + b.Periods
             );
+
+            //temp._producers.UnionWith(a._producers);
+            //temp._producers.UnionWith(b._producers);
+
+            //temp._consumers.UnionWith(a._consumers);
+            //temp._consumers.UnionWith(b._consumers);
         }
     }
 }

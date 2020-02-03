@@ -9,6 +9,7 @@ using Recipes;
 using NPC;
 using System;
 using Pipliz.JSON;
+using Harmony;
 
 namespace grasmanek94.Statistics
 {
@@ -21,6 +22,9 @@ namespace grasmanek94.Statistics
         static void OnAssemblyLoaded(string assemblyPath)
         {
             colonyStats = new Dictionary<Colony, ColonyStatistics>();
+
+            var harmony = HarmonyInstance.Create("grasmanek94.Statistics");
+            harmony.PatchAll();
         }
 
         [ModCallback(EModCallbackType.OnConstructTooltipUI, "OnConstructTooltipUI")]
@@ -42,46 +46,59 @@ namespace grasmanek94.Statistics
                 data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
 
                 data.menu.Items.Add(new Label(new LabelData("Last " + span + " average:", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Produced / Consumed: " + stat.AverageProduced.ToString() + " / " + stat.AverageConsumed.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                // data.menu.Items.Add(new Label(new LabelData("Producers / Consumers: " + stat.AverageProducers.ToString() + " / " + stat.AverageConsumers.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Inventory Added / Removed: " + stat.AverageInventoryAdded.ToString() + " / " + stat.AverageInventoryRemoved.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Created / Used: " + stat.AverageProduced.ToString() + " / " + stat.AverageConsumed.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Producers / Consumers: " + stat.AverageProducers.ToString() + " / " + stat.AverageConsumers.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Inventory + / -: " + stat.AverageInventoryAdded.ToString() + " / " + stat.AverageInventoryRemoved.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             }
         }
 
         static void AddProducerConsumer(NPCBase npc, IJob job)
         {
-            if (npc == null || job == null || npc.Colony == null || !job.IsValid)
-            {
-                return;
-            }
-
-            ColonyStatistics stats = GetColonyStats(npc.Colony);
-
+            // TODO
             // add producer and consumer here somehow
         }
 
         static void RemoveProducerConsumer(NPCBase npc, IJob job)
         {
-            if (npc == null || job == null || npc.Colony == null || !job.IsValid)
-            {
-                return;
-            }
-
-            ColonyStatistics stats = GetColonyStats(npc.Colony);
-
+            // TODO
             // remove producer and consumer here somehow
         }
 
         [ModCallback(EModCallbackType.OnNPCDied, "OnNPCDied")]
         static void OnNPCDied(NPCBase npc)
         {
-            RemoveProducerConsumer(npc, npc?.Job);
+            if (npc == null || npc.Colony == null)
+            {
+                return;
+            }
+
+            ColonyStatistics stats = GetColonyStats(npc.Colony);
+            stats.NPCConsume();
+
+            RemoveProducerConsumer(npc, npc.Job);
         }
 
         [ModCallback(EModCallbackType.OnNPCLoaded, "OnNPCLoaded")]
         static void OnNPCLoaded(NPCBase npc, JSONNode json)
         {
-            AddProducerConsumer(npc, npc?.Job);
+            if (npc == null || npc.Colony == null)
+            {
+                return;
+            }
+
+            AddProducerConsumer(npc, npc.Job);
+        }
+
+        [ModCallback(EModCallbackType.OnNPCRecruited, "OnNPCRecruited")]
+        static void OnNPCRecruited(NPCBase npc)
+        {
+            if (npc == null || npc.Colony == null)
+            {
+                return;
+            }
+
+            ColonyStatistics stats = GetColonyStats(npc.Colony);
+            stats.NPCProduce();
         }
 
         [ModCallback(EModCallbackType.OnNPCJobChanged, "OnNPCJobChanged")]
@@ -112,7 +129,9 @@ namespace grasmanek94.Statistics
 
             foreach (var item in items)
             {
-                stats.GetTimedItemStats(item.Type).Produce(item.Amount);
+                var itemStat = stats.GetTimedItemStats(item.Type);
+                itemStat.Produce(item.Amount);
+                itemStat.AddProducer(job.NPC.ID);
             }
         }
 
@@ -130,7 +149,9 @@ namespace grasmanek94.Statistics
             {
                 foreach(var item in recipe.Requirements)
                 {
-                    stats.GetTimedItemStats(item.Type).Consume(item.Amount);
+                    var itemStat = stats.GetTimedItemStats(item.Type);
+                    itemStat.Consume(item.Amount);
+                    itemStat.AddConsumer(job.NPC.ID);
                 }
             }
 
@@ -138,7 +159,9 @@ namespace grasmanek94.Statistics
             {
                 foreach (var item in result)
                 {
-                    stats.GetTimedItemStats(item.Type).Produce(item.Amount);
+                    var itemStat = stats.GetTimedItemStats(item.Type);
+                    itemStat.Produce(item.Amount);
+                    itemStat.AddProducer(job.NPC.ID);
                 }
             }
         }
@@ -156,14 +179,8 @@ namespace grasmanek94.Statistics
                 - Amount of crafting places currently producing
         */
 
+        // STILL TODO:
         // Stockpile class (Harmony)
-        //  public bool TryRemove(ushort type, int amount = 1, bool sendUpdate = true)
-        //  public bool TryRemove(IList<InventoryItem> toRemoveItems)
-        //  public bool TryRemove(InventoryItem item)
-        //  public void Add(ushort type, int amount = 1)
-        //  public void Add(InventoryItem item)
-        //  public void Add(IList<InventoryItem> list)
-        //  public void AddEnumerable<T>(T toAddItems) where T : IEnumerable<InventoryItem>
         //  public bool TryRemoveFood(ref float currentFood, float desiredFoodAddition)
         //  public void Clear()
         // AreaJobTracker
@@ -194,7 +211,7 @@ namespace grasmanek94.Statistics
             GetColonyStats(player.ActiveColony);
         }*/
 
-        static ColonyStatistics GetColonyStats(Colony colony)
+        public static ColonyStatistics GetColonyStats(Colony colony)
         {
             if(colony == null)
             {

@@ -5,10 +5,12 @@ namespace grasmanek94.Statistics
     public class ColonyStatistics
     {
         Dictionary<ushort, TimedItemStatistics> itemStatistics;
+        TimedItemStatistics npcStatistics;
 
         public ColonyStatistics()
         {
             itemStatistics = new Dictionary<ushort, TimedItemStatistics>();
+            npcStatistics = new TimedItemStatistics();
         }
 
         public TimedItemStatistics GetTimedItemStats(ushort item)
@@ -20,6 +22,23 @@ namespace grasmanek94.Statistics
                 itemStatistics.Add(item, stats);
             }
             return stats;
+        }
+
+        // died
+        public void NPCConsume()
+        {
+            npcStatistics.Consume(1);
+        }
+
+        // born
+        public void NPCProduce()
+        {
+            npcStatistics.Produce(1);
+        }
+
+        public List<ItemStatistics> GetNPCAverages()
+        {
+            return npcStatistics.Averages();
         }
     }
 }
