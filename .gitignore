@@ -7,3 +7,5 @@ obj/
 *.mdb
 *.user
 packages/
+*.zip
+*.rar
