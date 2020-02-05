@@ -32,6 +32,37 @@ namespace grasmanek94.Statistics
             harmony.PatchAll();
         }
 
+        static void PrintStatistic(ConstructTooltipUIData data, ItemStatistics stat, bool allTime)
+        {
+            string span = "";
+
+            if (!allTime)
+            {
+                span = "Last " + new TimeSpan(TimedItemStatistics.PeriodsToGameHours(stat.Periods), 0, 0).ToHumanReadableString() + " average:";
+            }
+            else
+            {
+                span = "This session average:";
+            }
+
+            data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
+
+            data.menu.Items.Add(new Label(new LabelData(span, TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Created " + stat.AverageProduced.ToString(".0#") + ", Used " + stat.AverageConsumed.ToString(".0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData(stat.AverageProducers.ToString(".0#") + " producers, " + stat.AverageConsumers.ToString(".0#") + " consumers", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Stock " + stat.AverageInventoryAdded.ToString(".0#") + " added, " + stat.AverageInventoryRemoved.ToString(".0#") + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            
+            if(stat.TradedIn != 0 || stat.TradedOut != 0)
+            {
+                data.menu.Items.Add(new Label(new LabelData("Trade +" + stat.AverageTradedIn.ToString(".0#") + " / -" + stat.AverageTradedOut.ToString(".0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            }
+
+            if(stat.UsedForFood != 0)
+            {
+                data.menu.Items.Add(new Label(new LabelData("Food Use: " + stat.AverageUsedForFood.ToString(".0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            }
+        }
+
         [ModCallback(EModCallbackType.OnConstructTooltipUI, "OnConstructTooltipUI", float.MaxValue)]
         static void OnConstructTooltipUI(ConstructTooltipUIData data)
         {
@@ -46,17 +77,13 @@ namespace grasmanek94.Statistics
 
             foreach (var stat in statlist)
             {
-                string span = new TimeSpan(stats.PeriodsToGameHours(stat.Periods), 0, 0).ToHumanReadableString();
-
-                data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
-
-                data.menu.Items.Add(new Label(new LabelData("Last " + span + " average:", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Created " + stat.AverageProduced.ToString() + ", Used " + stat.AverageConsumed.ToString(), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData(stat.AverageProducers.ToString() + " producers, " + stat.AverageConsumers.ToString() + " consumers" , TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-                data.menu.Items.Add(new Label(new LabelData("Stock " + stat.AverageInventoryAdded.ToString() + " added, " + stat.AverageInventoryRemoved.ToString() + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                PrintStatistic(data, stat, false);
             }
+
+            PrintStatistic(data, stats.AllTimeStatistics, false);
         }
 
+        // TODO
         static void AddProducerConsumer(NPCBase npc, IJob job)
         {
             INPCTypeSettings npcSettings;
@@ -95,6 +122,7 @@ namespace grasmanek94.Statistics
             }
         }
 
+        // TODO
         static void RemoveProducerConsumer(NPCBase npc, IJob job)
         {
             INPCTypeSettings npcSettings;

@@ -23,13 +23,13 @@ namespace grasmanek94.Statistics
 
         private int[] nextAverages;
 
-        private double GamePeriodLengthInMinutes { get; set; }
+        private static double GamePeriodLengthInMinutes { get; set; }
 
         private ItemStatistics[] timedItemStatistics;
         private ItemStatistics CurrentStatistics { get; set; }
         public ItemStatistics AllTimeStatistics { get; private set; }
 
-        public int PeriodsToGameHours(int periods)
+        public static int PeriodsToGameHours(int periods)
         {
             return (int)(periods * GamePeriodLengthInMinutes / 60.0);
         }
