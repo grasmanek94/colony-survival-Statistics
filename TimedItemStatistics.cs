@@ -27,7 +27,7 @@ namespace grasmanek94.Statistics
 
         private ItemStatistics[] timedItemStatistics;
         private ItemStatistics CurrentStatistics { get; set; }
-        private ItemStatistics AllTimeStatistics { get; set; }
+        public ItemStatistics AllTimeStatistics { get; private set; }
 
         public int PeriodsToGameHours(int periods)
         {

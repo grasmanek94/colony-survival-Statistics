@@ -80,7 +80,7 @@ namespace grasmanek94.Statistics
 				return;
 			}
 
-			Log.Write("RemoveAtHook Run");
+			Log.WriteError("RemoveAtHook Run");
 
 			if (stockpile.Owner == null)
 			{
@@ -103,7 +103,7 @@ namespace grasmanek94.Statistics
 				return;
 			}
 
-			Log.Write("SetValueAtIndex Run");
+			Log.WriteError("SetValueAtIndex Run");
 
 			if(stockpile.Owner == null)
 			{
@@ -258,6 +258,12 @@ namespace grasmanek94.Statistics
 			RemoveConsumerAddProducer(itemStats, BlockFarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
+
+			if (StockpileHookTryRemoveFood.isFood || ItemConfigHookTryFetchMore.isFood)
+			{
+				// wonder if this gets ever called ? It shouldn't though
+				itemStats.UseAsFood(-amount);
+			}
 
 			if (RuleHookTryExecute.trading)
 			{

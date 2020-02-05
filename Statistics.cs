@@ -59,16 +59,21 @@ namespace grasmanek94.Statistics
 
         static void AddProducerConsumer(NPCBase npc, IJob job)
         {
-            if (npc == null || job == null || ServerManager.RecipeStorage == null)
+            INPCTypeSettings npcSettings;
+
+            if (npc == null || job == null || 
+                ServerManager.RecipeStorage == null || 
+                NPCType.NPCTypes == null ||
+                !NPCType.NPCTypes.TryGetValue(npc.NPCType, out npcSettings))
             {
                 return;
             }
 
             List<Recipe> recipes;
 
-            Log.Write("AddProducerconsumer: KeyName = {0}", NPCType.NPCTypes[npc.NPCType].KeyName);
+            Log.Write("AddProducerconsumer: KeyName = {0}", npcSettings.KeyName);
 
-            bool found = ServerManager.RecipeStorage.TryGetRecipes(NPCType.NPCTypes[npc.NPCType].KeyName, out recipes);
+            bool found = ServerManager.RecipeStorage.TryGetRecipes(npcSettings.KeyName, out recipes);
             
             Log.Write("AddProducerconsumer: Found = {0}", found);
 
@@ -88,69 +93,25 @@ namespace grasmanek94.Statistics
                     }
                 }
             }
-
-            switch (job)
-            {
-                case BlockFarmAreaJob blockFarm:
-                    Log.Write("BlockFarmAreaJob");
-                    break;
-                case FarmAreaJob farm:
-                    Log.Write("FarmAreaJob");
-                    break;
-                case OliveFarmerAreaJob oliveFarm:
-                    Log.Write("OliveFarmerAreaJob");
-                    break;
-                case ForesterJob forestFarm:
-                    Log.Write("ForesterJob");
-                    break;
-                case CraftingJobInstance crafting:
-                    Log.Write("CraftingJobInstance");
-                    break;
-                case CraftingJobWaterInstance water:
-                    Log.Write("CraftingJobWaterInstance");
-                    break;
-                case GuardJobInstance guard:
-                    Log.Write("GuardJobInstance");
-                    break;
-                case MinerJobInstance miner:
-                    Log.Write("MinerJobInstance {0}", miner.BlockType.Name);
-                    break;
-                case ScientistJobInstance scientist:
-                    Log.Write("ScientistJobInstance");
-                    break;
-                case TraderJobInstance trader:
-                    Log.Write("TraderJobInstance");
-                    break;
-                case ConstructionJobInstance construction:
-                    Log.Write("ConstructionJobInstance");
-                    break;
-                case BlockJobInstance block:
-                    Log.Write("BlockJobInstance");
-                    break;
-                case AbstractAreaJob abstractArea:
-                    Log.Write("AbstractAreaJob");
-                    break;
-                case AbstractFarmAreaJobDefinition abstractFarm:
-                    Log.Write("AbstractFarmAreaJobDefinition");
-                    break;
-                case LaborerJob laborer:
-                    Log.Write("LaborerJob");
-                    break;
-            }
         }
 
         static void RemoveProducerConsumer(NPCBase npc, IJob job)
         {
-            if (npc == null || job == null || ServerManager.RecipeStorage == null)
+            INPCTypeSettings npcSettings;
+
+            if (npc == null || job == null ||
+                ServerManager.RecipeStorage == null ||
+                NPCType.NPCTypes == null ||
+                !NPCType.NPCTypes.TryGetValue(npc.NPCType, out npcSettings))
             {
                 return;
             }
 
             List<Recipe> recipes;
 
-            Log.Write("RemoveProducerConsumer: KeyName = {0}", NPCType.NPCTypes[npc.NPCType].KeyName);
+            Log.Write("RemoveProducerConsumer: KeyName = {0}", npcSettings.KeyName);
 
-            bool found = ServerManager.RecipeStorage.TryGetRecipes(NPCType.NPCTypes[npc.NPCType].KeyName, out recipes);
+            bool found = ServerManager.RecipeStorage.TryGetRecipes(npcSettings.KeyName, out recipes);
 
             Log.Write("RemoveProducerConsumer: Found = {0}", found);
 
@@ -169,55 +130,6 @@ namespace grasmanek94.Statistics
                         Log.Write("{0}: {1}", result.Type, result.Amount);
                     }
                 }
-            }
-
-            switch (job)
-            {
-                case BlockFarmAreaJob blockFarm:
-                    Log.Write("BlockFarmAreaJob");
-                    break;
-                case FarmAreaJob farm:
-                    Log.Write("FarmAreaJob");
-                    break;
-                case OliveFarmerAreaJob oliveFarm:
-                    Log.Write("OliveFarmerAreaJob");
-                    break;
-                case ForesterJob forestFarm:
-                    Log.Write("ForesterJob");
-                    break;
-                case CraftingJobInstance crafting:
-                    Log.Write("CraftingJobInstance");
-                    break;
-                case CraftingJobWaterInstance water:
-                    Log.Write("CraftingJobWaterInstance");
-                    break;
-                case GuardJobInstance guard:
-                    Log.Write("GuardJobInstance");
-                    break;
-                case MinerJobInstance miner:
-                    Log.Write("MinerJobInstance");
-                    break;
-                case ScientistJobInstance scientist:
-                    Log.Write("ScientistJobInstance");
-                    break;
-                case TraderJobInstance trader:
-                    Log.Write("TraderJobInstance");
-                    break;
-                case ConstructionJobInstance construction:
-                    Log.Write("ConstructionJobInstance");
-                    break;
-                case BlockJobInstance block:
-                    Log.Write("BlockJobInstance");
-                    break;
-                case AbstractAreaJob abstractArea:
-                    Log.Write("AbstractAreaJob");
-                    break;
-                case AbstractFarmAreaJobDefinition abstractFarm:
-                    Log.Write("AbstractFarmAreaJobDefinition");
-                    break;
-                case LaborerJob laborer:
-                    Log.Write("LaborerJob");
-                    break;
             }
         }
 
