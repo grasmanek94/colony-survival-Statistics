@@ -339,52 +339,14 @@ namespace grasmanek94.Statistics
             }
         }
 
-        // var other_sources = BlockFarmAreaJobDefinition / PlacedBlockType
-        // var sources = ServerManager.RecipeStorage.SourceBlockTypesPerProductionItem;
+        // Maybe add these too: (?)
+        // JobFinder
 
-        /*
-            Stats:
-                - Production (Output)
-                - Consumption (Input)
-                - Requirement
-                - Worker amount
-                - Amount of farms currently producing
-                - Amount of crafting places currently producing
-        */
-
-        // STILL TODO:
-        // Stockpile class (Harmony)
-        //  public bool TryRemoveFood(ref float currentFood, float desiredFoodAddition)
-        //  public void Clear()
-        // AreaJobTracker
-        // BlockJobInstance??
-
-        /*[ModCallback(EModCallbackType.OnLoadingColony, "OnLoadingColony")]
-        static void OnLoadingColony(Colony colony, JSONNode node)
-        {
-            GetColonyStats(colony);
-        }
-
-        [ModCallback(EModCallbackType.OnCreatedColony, "OnCreatedColony")]
-        static void OnCreatedColony(Colony colony)
-        {
-            GetColonyStats(colony);
-        }
-
-        [ModCallback(EModCallbackType.OnActiveColonyChanges, "OnActiveColonyChanges")]
-        static void OnActiveColonyChanges(Players.Player player, Colony oldColony, Colony newColony)
-        {
-            GetColonyStats(oldColony);
-            GetColonyStats(newColony);
-        }
-
-        [ModCallback(EModCallbackType.OnPlayerRespawn, "OnPlayerRespawn")]
-        static void OnPlayerRespawn(Players.Player player)
-        {
-            GetColonyStats(player.ActiveColony);
-        }*/
-
-        // Maybe add ColonyTrading too?
+        // Maybe I should wait until NPC is at stockpile and hook into the NPC.Inventory.Dump function? (often found in OnNPCAtStockpile)
+        // That would be actualy more accurate than Crafted/Gathered, because these callbacks are called before the items are in the inventory
+        // .. which means that if an NPC dies it's not accounted for correctly? but... is is much easier to keep track of recipes this way..
+        // or process the NPC inventory on death.. but then how do we know if the NPC got it from the stockpile (Consumer) or produced it (Producer)? 
+        // is the Job still valid?
 
         public static ColonyStatistics GetColonyStats(Colony colony)
         {

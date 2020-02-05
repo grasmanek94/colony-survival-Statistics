@@ -27,6 +27,7 @@ namespace grasmanek94.Statistics
 
         private ItemStatistics[] timedItemStatistics;
         private ItemStatistics CurrentStatistics { get; set; }
+        private ItemStatistics AllTimeStatistics { get; set; }
 
         public int PeriodsToGameHours(int periods)
         {
@@ -43,6 +44,7 @@ namespace grasmanek94.Statistics
             GamePeriodLengthInMinutes = ServerManager.ServerSettings.Time.GameTimeScale * RealLifePeriodLengthInSeconds / 60;
             MaxPeriods = (int)(PeriodDays * 24 * 60 / GamePeriodLengthInMinutes) + 1;
             timedItemStatistics = new ItemStatistics[MaxPeriods];
+            AllTimeStatistics = new ItemStatistics();
             averages = new List<ItemStatistics>();
 
             CurrentPeriod = GetPeriod();
@@ -63,8 +65,13 @@ namespace grasmanek94.Statistics
             };
         }
 
-        private void PerformPeriodUpdate()
+        private void PerformPeriodUpdate(bool forceDirty = false)
         {
+            if(forceDirty)
+            {
+                Dirty = true;
+            }
+
             int period = GetPeriod();
             if (CurrentPeriod != period)
             {
@@ -79,58 +86,79 @@ namespace grasmanek94.Statistics
 
         public override void Produce(int amount)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.Produce(amount);
+            AllTimeStatistics.Produce(amount);
         }
 
         public override void Consume(int amount)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.Consume(amount);
+            AllTimeStatistics.Consume(amount);
         }
 
         public override void AddProducer(int entity)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.AddProducer(entity);
+            AllTimeStatistics.AddProducer(entity);
         }
 
         public override void AddConsumer(int entity)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.AddConsumer(entity);
+            AllTimeStatistics.AddConsumer(entity);
         }
 
         public override void RemoveProducer(int entity)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.RemoveProducer(entity);
+            AllTimeStatistics.RemoveProducer(entity);
         }
 
         public override void RemoveConsumer(int entity)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.RemoveConsumer(entity);
+            AllTimeStatistics.RemoveConsumer(entity);
         }
 
         public override void AddInventory(int amount = 1)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.AddInventory(amount);
+            AllTimeStatistics.AddInventory(amount);
         }
 
         public override void RemoveInventory(int amount = 1)
         {
-            PerformPeriodUpdate();
-            Dirty = true;
+            PerformPeriodUpdate(true);
             CurrentStatistics.RemoveInventory(amount);
+            AllTimeStatistics.RemoveInventory(amount);
+        }
+
+        public override void UseAsFood(int amount)
+        {
+            PerformPeriodUpdate(true);
+            CurrentStatistics.UseAsFood(amount);
+            AllTimeStatistics.UseAsFood(amount);
+        }
+
+        public override void TradeIn(int amount)
+        {
+            PerformPeriodUpdate(true);
+            CurrentStatistics.TradeIn(amount);
+            AllTimeStatistics.TradeIn(amount);
+        }
+
+        public override void TradeOut(int amount)
+        {
+            PerformPeriodUpdate(true);
+            CurrentStatistics.TradeOut(amount);
+            AllTimeStatistics.TradeOut(amount);
         }
 
         public ItemStatistics Average(int lastPeriods)

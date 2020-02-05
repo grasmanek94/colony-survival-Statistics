@@ -16,6 +16,9 @@ namespace grasmanek94.Statistics
         public int Consumers { get; private set; }
         public int InventoryAdded { get; private set; }
         public int InventoryRemoved { get; private set; }
+        public int UsedForFood { get; private set; }
+        public int TradedIn { get; private set; }
+        public int TradedOut { get; private set; }
 
         public override void Produce(int amount)
         {
@@ -69,6 +72,21 @@ namespace grasmanek94.Statistics
             InventoryRemoved += amount;
         }
 
+        public override void UseAsFood(int amount)
+        {
+            UsedForFood += amount;
+        }
+
+        public override void TradeIn(int amount)
+        {
+            TradedIn += amount;
+        }
+
+        public override void TradeOut(int amount)
+        {
+            TradedOut += amount;
+        }
+
         public ItemStatistics()
         {
             Reset();
@@ -85,11 +103,16 @@ namespace grasmanek94.Statistics
             Consumers = 0;
             InventoryAdded = 0;
             InventoryRemoved = 0;
+            UsedForFood = 0;
+            TradedIn = 0;
+            TradedOut = 0;
 
             Periods = 1;
         }
 
-        public ItemStatistics(int produced, int consumed, int producers, int consumers, int inventoryAdded, int inventoryRemoved, int periods)
+        public ItemStatistics(int produced, int consumed, int producers, int consumers, 
+            int inventoryAdded, int inventoryRemoved, int usedForFood, int tradedIn, 
+            int tradedOut, int periods)
         {
             _producers = new HashSet<int>();
             _consumers = new HashSet<int>();
@@ -100,6 +123,9 @@ namespace grasmanek94.Statistics
             Consumers = consumers;
             InventoryAdded = inventoryAdded;
             InventoryRemoved = inventoryRemoved;
+            UsedForFood = usedForFood;
+            TradedIn = tradedIn;
+            TradedOut = tradedOut;
 
             Periods = periods;
         }
@@ -115,6 +141,9 @@ namespace grasmanek94.Statistics
             Consumers = other.Consumers;
             InventoryAdded = other.InventoryAdded;
             InventoryRemoved = other.InventoryRemoved;
+            UsedForFood = other.UsedForFood;
+            TradedIn = other.TradedIn;
+            TradedOut = other.TradedOut;
 
             Periods = other.Periods;
         }
@@ -132,6 +161,9 @@ namespace grasmanek94.Statistics
         public float AverageNetProduced { get { return NetProduced / Periods; } }
         public float AverageNetProducers { get { return NetProducers / Periods; } }
         public float AverageNetInventory { get { return NetInventory / Periods; } }
+        public float AverageUsedForFood { get { return UsedForFood / Periods; } }
+        public float AverageTradedIn { get { return UsedForFood / Periods; } }
+        public float AverageTradedOut { get { return UsedForFood / Periods; } }
 
         public static ItemStatistics operator +(ItemStatistics a, ItemStatistics b)
         {
@@ -142,6 +174,9 @@ namespace grasmanek94.Statistics
                 a.Consumers + b.Consumers,
                 a.InventoryAdded + b.InventoryAdded,
                 a.InventoryRemoved + b.InventoryRemoved,
+                a.UsedForFood + b.UsedForFood,
+                a.TradedIn + b.TradedIn,
+                a.TradedOut + b.TradedOut,
                 a.Periods + b.Periods
             );
 

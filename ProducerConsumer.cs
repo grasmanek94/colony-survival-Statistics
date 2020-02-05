@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace grasmanek94.Statistics
+﻿namespace grasmanek94.Statistics
 {
     public abstract class ProducerConsumer
     {
@@ -12,5 +10,8 @@ namespace grasmanek94.Statistics
         public abstract void RemoveConsumer(int entity);
         public abstract void AddInventory(int amount);
         public abstract void RemoveInventory(int amount);
+        public abstract void UseAsFood(int amount);
+        public abstract void TradeIn(int amount);
+        public abstract void TradeOut(int amount);
     }
 }
