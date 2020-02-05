@@ -11,6 +11,10 @@ using System;
 using Pipliz.JSON;
 using Harmony;
 using Pipliz;
+using Jobs.Implementations;
+using Jobs.Implementations.Construction;
+using static Jobs.BlockFarmAreaJobDefinition;
+using static Jobs.Implementations.TemperateForesterDefinition;
 
 namespace grasmanek94.Statistics
 {
@@ -55,14 +59,166 @@ namespace grasmanek94.Statistics
 
         static void AddProducerConsumer(NPCBase npc, IJob job)
         {
-            // TODO
-            // add producer and consumer here somehow
+            if (npc == null || job == null || ServerManager.RecipeStorage == null)
+            {
+                return;
+            }
+
+            List<Recipe> recipes;
+
+            Log.Write("AddProducerconsumer: KeyName = {0}", NPCType.NPCTypes[npc.NPCType].KeyName);
+
+            bool found = ServerManager.RecipeStorage.TryGetRecipes(NPCType.NPCTypes[npc.NPCType].KeyName, out recipes);
+            
+            Log.Write("AddProducerconsumer: Found = {0}", found);
+
+            if(found)
+            {
+                foreach(var recipe in recipes)
+                {
+                    Log.Write("AddProducerconsumer: Requirements:");
+                    foreach(var requirement in recipe.Requirements)
+                    {
+                        Log.Write("{0}: {1}", requirement.Type, requirement.Amount);
+                    }
+                    Log.Write("AddProducerconsumer: Results:");
+                    foreach (var result in recipe.Results)
+                    {
+                        Log.Write("{0}: {1}", result.Type, result.Amount);
+                    }
+                }
+            }
+
+            switch (job)
+            {
+                case BlockFarmAreaJob blockFarm:
+                    Log.Write("BlockFarmAreaJob");
+                    break;
+                case FarmAreaJob farm:
+                    Log.Write("FarmAreaJob");
+                    break;
+                case OliveFarmerAreaJob oliveFarm:
+                    Log.Write("OliveFarmerAreaJob");
+                    break;
+                case ForesterJob forestFarm:
+                    Log.Write("ForesterJob");
+                    break;
+                case CraftingJobInstance crafting:
+                    Log.Write("CraftingJobInstance");
+                    break;
+                case CraftingJobWaterInstance water:
+                    Log.Write("CraftingJobWaterInstance");
+                    break;
+                case GuardJobInstance guard:
+                    Log.Write("GuardJobInstance");
+                    break;
+                case MinerJobInstance miner:
+                    Log.Write("MinerJobInstance {0}", miner.BlockType.Name);
+                    break;
+                case ScientistJobInstance scientist:
+                    Log.Write("ScientistJobInstance");
+                    break;
+                case TraderJobInstance trader:
+                    Log.Write("TraderJobInstance");
+                    break;
+                case ConstructionJobInstance construction:
+                    Log.Write("ConstructionJobInstance");
+                    break;
+                case BlockJobInstance block:
+                    Log.Write("BlockJobInstance");
+                    break;
+                case AbstractAreaJob abstractArea:
+                    Log.Write("AbstractAreaJob");
+                    break;
+                case AbstractFarmAreaJobDefinition abstractFarm:
+                    Log.Write("AbstractFarmAreaJobDefinition");
+                    break;
+                case LaborerJob laborer:
+                    Log.Write("LaborerJob");
+                    break;
+            }
         }
 
         static void RemoveProducerConsumer(NPCBase npc, IJob job)
         {
-            // TODO
-            // remove producer and consumer here somehow
+            if (npc == null || job == null || ServerManager.RecipeStorage == null)
+            {
+                return;
+            }
+
+            List<Recipe> recipes;
+
+            Log.Write("RemoveProducerConsumer: KeyName = {0}", NPCType.NPCTypes[npc.NPCType].KeyName);
+
+            bool found = ServerManager.RecipeStorage.TryGetRecipes(NPCType.NPCTypes[npc.NPCType].KeyName, out recipes);
+
+            Log.Write("RemoveProducerConsumer: Found = {0}", found);
+
+            if (found)
+            {
+                foreach (var recipe in recipes)
+                {
+                    Log.Write("RemoveProducerConsumer: Requirements:");
+                    foreach (var requirement in recipe.Requirements)
+                    {
+                        Log.Write("{0}: {1}", requirement.Type, requirement.Amount);
+                    }
+                    Log.Write("RemoveProducerConsumer: Results:");
+                    foreach (var result in recipe.Results)
+                    {
+                        Log.Write("{0}: {1}", result.Type, result.Amount);
+                    }
+                }
+            }
+
+            switch (job)
+            {
+                case BlockFarmAreaJob blockFarm:
+                    Log.Write("BlockFarmAreaJob");
+                    break;
+                case FarmAreaJob farm:
+                    Log.Write("FarmAreaJob");
+                    break;
+                case OliveFarmerAreaJob oliveFarm:
+                    Log.Write("OliveFarmerAreaJob");
+                    break;
+                case ForesterJob forestFarm:
+                    Log.Write("ForesterJob");
+                    break;
+                case CraftingJobInstance crafting:
+                    Log.Write("CraftingJobInstance");
+                    break;
+                case CraftingJobWaterInstance water:
+                    Log.Write("CraftingJobWaterInstance");
+                    break;
+                case GuardJobInstance guard:
+                    Log.Write("GuardJobInstance");
+                    break;
+                case MinerJobInstance miner:
+                    Log.Write("MinerJobInstance");
+                    break;
+                case ScientistJobInstance scientist:
+                    Log.Write("ScientistJobInstance");
+                    break;
+                case TraderJobInstance trader:
+                    Log.Write("TraderJobInstance");
+                    break;
+                case ConstructionJobInstance construction:
+                    Log.Write("ConstructionJobInstance");
+                    break;
+                case BlockJobInstance block:
+                    Log.Write("BlockJobInstance");
+                    break;
+                case AbstractAreaJob abstractArea:
+                    Log.Write("AbstractAreaJob");
+                    break;
+                case AbstractFarmAreaJobDefinition abstractFarm:
+                    Log.Write("AbstractFarmAreaJobDefinition");
+                    break;
+                case LaborerJob laborer:
+                    Log.Write("LaborerJob");
+                    break;
+            }
         }
 
         [ModCallback(EModCallbackType.OnNPCDied, "OnNPCDied", float.MaxValue)]
@@ -227,6 +383,8 @@ namespace grasmanek94.Statistics
         {
             GetColonyStats(player.ActiveColony);
         }*/
+
+        // Maybe add ColonyTrading too?
 
         public static ColonyStatistics GetColonyStats(Colony colony)
         {
