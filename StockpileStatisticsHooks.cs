@@ -130,12 +130,12 @@ namespace grasmanek94.Statistics
 	{
 		public static NPCBase npc = null;
 
-		static void Prefix(BlockJobInstance __instance, ref NPCBase.NPCState state)
+		static void Prefix(ScientistJobSettingsHookOnNPCAtJob __instance, BlockJobInstance blockJobInstance, ref NPCBase.NPCState state)
 		{
-			npc = __instance.NPC;
+			npc = blockJobInstance.NPC;
 		}
 
-		static void Postfix(BlockJobInstance __instance, NPCBase.NPCState state)
+		static void Postfix(ScientistJobSettingsHookOnNPCAtJob __instance, BlockJobInstance blockJobInstance, ref NPCBase.NPCState state)
 		{
 			npc = null;
 		}
@@ -194,17 +194,34 @@ namespace grasmanek94.Statistics
 	}
 
 	[HarmonyPatch(typeof(ItemConfig))]
-	[HarmonyPatch("TryFetchMore")]
-	public class ItemConfigHookTryFetchMore
+	[HarmonyPatch("OnLuxuryVisit")]
+	public class ItemConfigHookOnLuxuryVisit
 	{
 		public static bool isFood;
 
-		static void Prefix(ItemConfig __instance, Colony colony, float multiplier)
+		static void Prefix(ItemConfig __instance, Colony colony, float hoursSinceShop)
 		{
 			isFood = true;
 		}
 
-		static void Postfix(ItemConfig __instance, Colony colony, float multiplier)
+		static void Postfix(ItemConfig __instance, Colony colony, float hoursSinceShop)
+		{
+			isFood = false;
+		}
+	}
+
+	[HarmonyPatch(typeof(ItemConfig))]
+	[HarmonyPatch("OnFoodVisit")]
+	public class ItemConfigHookOnFoodVisit
+	{
+		public static bool isFood;
+
+		static void Prefix(ItemConfig __instance, Colony colony, float foodDays, ref float foodTaken)
+		{
+			isFood = true;
+		}
+
+		static void Postfix(ItemConfig __instance, Colony colony, float foodDays, ref float foodTaken)
 		{
 			isFood = false;
 		}
@@ -259,7 +276,9 @@ namespace grasmanek94.Statistics
 			RemoveConsumerAddProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
 
-			if (StockpileHookTryRemoveFood.isFood || ItemConfigHookTryFetchMore.isFood)
+			if (StockpileHookTryRemoveFood.isFood || 
+				ItemConfigHookOnLuxuryVisit.isFood || 
+				ItemConfigHookOnFoodVisit.isFood)
 			{
 				// wonder if this gets ever called ? It shouldn't though
 				itemStats.UseAsFood(-amount);
@@ -284,7 +303,9 @@ namespace grasmanek94.Statistics
 			AddConsumerRemoveProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			AddConsumerRemoveProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
 
-			if (StockpileHookTryRemoveFood.isFood || ItemConfigHookTryFetchMore.isFood)
+			if (StockpileHookTryRemoveFood.isFood ||
+				ItemConfigHookOnLuxuryVisit.isFood ||
+				ItemConfigHookOnFoodVisit.isFood)
 			{
 				itemStats.UseAsFood(amount);
 			}
