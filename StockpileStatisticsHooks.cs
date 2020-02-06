@@ -22,9 +22,11 @@ namespace grasmanek94.Statistics
 		{
 			if (amount <= 0 || type <= 0 || __instance.Owner == null)
 			{
+				// Log.Write("StockpileHookAdd INVALID");
 				return;
 			}
 
+			// Log.WriteWarning("StockpileHookAdd");
 			InventoryStatistics.AddInventory(__instance.Owner, type, amount);
 		}
 	}
@@ -38,12 +40,18 @@ namespace grasmanek94.Statistics
 		{
 			if (amount <= 0 || type <= 0 || __instance.Owner == null)
 			{
+				// Log.Write("StockpileHookTryRemove INVALID");
 				return;
 			}
 
 			if (__result)
 			{
+				// Log.WriteWarning("StockpileHookTryRemove TRUE");
 				InventoryStatistics.RemoveInventory(__instance.Owner, type, amount);
+			}
+			else
+			{
+				// Log.WriteWarning("StockpileHookTryRemove FALSE");
 			}
 		}
 	}
@@ -57,12 +65,14 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(Stockpile __instance, ref float currentFood, float desiredFoodAddition)
 		{
+			// Log.WriteWarning("StockpileHookTryRemoveFood::Prefix");
 			inFunctionStockpile = __instance;
 			isFood = true;
 		}
 
 		static void Postfix(Stockpile __instance, bool __result, ref float currentFood, float desiredFoodAddition)
 		{
+			// Log.WriteWarning("StockpileHookTryRemoveFood::Postfix");
 			inFunctionStockpile = null;
 			isFood = false;
 		}
@@ -77,16 +87,17 @@ namespace grasmanek94.Statistics
 			Stockpile stockpile = StockpileHookTryRemoveFood.inFunctionStockpile;
 			if (stockpile == null)
 			{
+				// Log.Write("SortedListHookRemoveAt INVALID STOCKPILE");
 				return;
 			}
-
-			Log.WriteError("RemoveAtHook Run");
 
 			if (stockpile.Owner == null)
 			{
+				// Log.Write("SortedListHookRemoveAt INVALID OWNER");
 				return;
 			}
 
+			// Log.WriteWarning("SortedListHookRemoveAt");
 			InventoryStatistics.RemoveInventory(stockpile.Owner, __instance.GetKeyAtIndex(index), amount);
 		}
 	}
@@ -100,15 +111,17 @@ namespace grasmanek94.Statistics
 			Stockpile stockpile = StockpileHookTryRemoveFood.inFunctionStockpile;
 			if (stockpile == null)
 			{
+				// Log.Write("SortedListHookSetValueAtIndex INVALID STOCKPILE");
 				return;
 			}
-
-			Log.WriteError("SetValueAtIndex Run");
 
 			if(stockpile.Owner == null)
 			{
+				// Log.Write("SortedListHookSetValueAtIndex INVALID OWNER");
 				return;
 			}
+
+			// Log.WriteWarning("SortedListHookSetValueAtIndex");
 
 			int difference = __instance.GetValueAtIndex(index) - val;
 			ushort type = __instance.GetKeyAtIndex(index);
@@ -132,11 +145,13 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(ScientistJobSettingsHookOnNPCAtJob __instance, BlockJobInstance blockJobInstance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("ScientistJobSettingsHookOnNPCAtJob::Prefix");
 			npc = blockJobInstance.NPC;
 		}
 
 		static void Postfix(ScientistJobSettingsHookOnNPCAtJob __instance, BlockJobInstance blockJobInstance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("ScientistJobSettingsHookOnNPCAtJob::Postfix");
 			npc = null;
 		}
 	}
@@ -149,11 +164,13 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(GuardJobSettings __instance, GuardJobInstance instance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("GuardJobSettingsHookShootAtTarget::Prefix");
 			npc = instance.NPC;
 		}
 
 		static void Postfix(GuardJobSettings __instance, GuardJobInstance instance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("GuardJobSettingsHookShootAtTarget::Postfix");
 			npc = null;
 		}
 	}
@@ -167,11 +184,13 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(BlockFarmAreaJob __instance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("BlockFarmAreaJobHookOnNPCAtJob::Prefix");
 			npc = __instance.NPC;
 		}
 
 		static void Postfix(BlockFarmAreaJob __instance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("BlockFarmAreaJobHookOnNPCAtJob::Postfix");
 			npc = null;
 		}
 	}
@@ -184,11 +203,13 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(FarmAreaJob __instance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("FarmAreaJobHookOnNPCAtJob::Prefix");
 			npc = __instance.NPC;
 		}
 
 		static void Postfix(FarmAreaJob __instance, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("FarmAreaJobHookOnNPCAtJob::Postfix");
 			npc = null;
 		}
 	}
@@ -201,11 +222,13 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(Rule __instance, ref float tradePower)
 		{
+			// Log.WriteWarning("RuleHookTryExecute::Prefix");
 			trading = true;
 		}
 
 		static void Postfix(Rule __instance, ref float tradePower)
 		{
+			// Log.WriteWarning("RuleHookTryExecute::Postfix");
 			trading = false;
 		}
 	}
@@ -218,45 +241,32 @@ namespace grasmanek94.Statistics
 
 		static void Prefix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("BuilderBasicHookDoJob::Prefix");
 			npc = job.NPC;
 		}
 
 		static void Postfix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
 		{
+			// Log.WriteWarning("BuilderBasicHookDoJob::Postfix");
 			npc = null;
 		}
 	}
 
 	[HarmonyPatch(typeof(ItemConfig))]
-	[HarmonyPatch("OnFoodVisit")]
-	public class ItemConfigHookOnFoodVisit
+	[HarmonyPatch("TryFetchMore")]
+	public class ItemConfigHookTryFetchMore
 	{
 		public static bool isFood;
 
-		static void Prefix(Colony colony, float foodDays, ref float foodTaken)
+		static void Prefix(Colony colony, float multiplier)
 		{
+			// Log.WriteWarning("ItemConfigHookTryFetchMore::Prefix");
 			isFood = true;
 		}
 
-		static void Postfix(Colony colony, float foodDays, ref float foodTaken)
+		static void Postfix(Colony colony, float multiplier)
 		{
-			isFood = false;
-		}
-	}
-
-	[HarmonyPatch(typeof(ItemConfig))]
-	[HarmonyPatch("OnLuxuryVisit")]
-	public class ItemConfigHookOnLuxuryVisit
-	{
-		public static bool isFood;
-
-		static void Prefix(Colony colony, float hoursSinceShop)
-		{
-			isFood = true;
-		}
-
-		static void Postfix(Colony colony, float hoursSinceShop)
-		{
+			// Log.WriteWarning("ItemConfigHookTryFetchMore::Postfix");
 			isFood = false;
 		}
 	}
@@ -276,9 +286,8 @@ namespace grasmanek94.Statistics
 			RemoveConsumerAddProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
 
-			if (StockpileHookTryRemoveFood.isFood || 
-				ItemConfigHookOnLuxuryVisit.isFood || 
-				ItemConfigHookOnFoodVisit.isFood)
+			if (StockpileHookTryRemoveFood.isFood ||
+				ItemConfigHookTryFetchMore.isFood)
 			{
 				// wonder if this gets ever called ? It shouldn't though
 				itemStats.UseAsFood(-amount);
@@ -304,8 +313,7 @@ namespace grasmanek94.Statistics
 			AddConsumerRemoveProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
 
 			if (StockpileHookTryRemoveFood.isFood ||
-				ItemConfigHookOnLuxuryVisit.isFood ||
-				ItemConfigHookOnFoodVisit.isFood)
+				ItemConfigHookTryFetchMore.isFood)
 			{
 				itemStats.UseAsFood(amount);
 			}

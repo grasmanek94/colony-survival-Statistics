@@ -11,10 +11,6 @@ using System;
 using Pipliz.JSON;
 using Harmony;
 using Pipliz;
-using Jobs.Implementations;
-using Jobs.Implementations.Construction;
-using static Jobs.BlockFarmAreaJobDefinition;
-using static Jobs.Implementations.TemperateForesterDefinition;
 
 namespace grasmanek94.Statistics
 {
@@ -23,13 +19,26 @@ namespace grasmanek94.Statistics
     {
         static Dictionary<Colony, ColonyStatistics> colonyStats;
 
-        [ModCallback(EModCallbackType.OnAssemblyLoaded, "OnAssemblyLoaded", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnAssemblyLoaded, "grasmanek94.Statistics.OnAssemblyLoaded", float.MaxValue)]
         static void OnAssemblyLoaded(string assemblyPath)
         {
             colonyStats = new Dictionary<Colony, ColonyStatistics>();
 
             var harmony = HarmonyInstance.Create("grasmanek94.Statistics");
             harmony.PatchAll();
+        }
+
+        static string PrintSingleStat(float value)
+        {
+            if(value < 1.0f)
+            {
+                return value.ToString("0.0##");
+            }
+            if (value < 10.0f)
+            {
+                return value.ToString("0.0#");
+            }
+            return value.ToString();
         }
 
         static void PrintStatistic(ConstructTooltipUIData data, ItemStatistics stat, bool allTime)
@@ -48,22 +57,22 @@ namespace grasmanek94.Statistics
             data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
 
             data.menu.Items.Add(new Label(new LabelData(span, TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData("Created " + stat.AverageProduced.ToString("0.0#") + ", Used " + stat.AverageConsumed.ToString("0.0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData(stat.AverageProducers.ToString("0.0#") + " producers, " + stat.AverageConsumers.ToString("0.0#") + " consumers", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData("Stock " + stat.AverageInventoryAdded.ToString("0.0#") + " added, " + stat.AverageInventoryRemoved.ToString("0.0#") + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Created " + PrintSingleStat(stat.AverageProduced) + ", Used " + PrintSingleStat(stat.AverageConsumed), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData(PrintSingleStat(stat.AverageProducers) + " producers, " + PrintSingleStat(stat.AverageConsumers) + " consumers", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Stock " + PrintSingleStat(stat.AverageInventoryAdded) + " added, " + PrintSingleStat(stat.AverageInventoryRemoved) + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             
             if(stat.TradedIn != 0 || stat.TradedOut != 0)
             {
-                data.menu.Items.Add(new Label(new LabelData("Trade +" + stat.AverageTradedIn.ToString("0.0#") + " / -" + stat.AverageTradedOut.ToString("0.0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Trade +" + PrintSingleStat(stat.AverageTradedIn) + " / -" + PrintSingleStat(stat.AverageTradedOut), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             }
 
             if(stat.UsedForFood != 0)
             {
-                data.menu.Items.Add(new Label(new LabelData("Food Use: " + stat.AverageUsedForFood.ToString("0.0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Food Use: " + PrintSingleStat(stat.AverageUsedForFood), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             }
         }
 
-        [ModCallback(EModCallbackType.OnConstructTooltipUI, "OnConstructTooltipUI", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnConstructTooltipUI, "grasmanek94.Statistics.OnConstructTooltipUI", float.MaxValue)]
         static void OnConstructTooltipUI(ConstructTooltipUIData data)
         {
             if(data.hoverType != ETooltipHoverType.Item)
@@ -83,85 +92,73 @@ namespace grasmanek94.Statistics
             PrintStatistic(data, stats.AllTimeStatistics, true);
         }
 
-        // TODO
         static void AddProducerConsumer(NPCBase npc, IJob job)
         {
             INPCTypeSettings npcSettings;
 
             if (npc == null || job == null || 
                 ServerManager.RecipeStorage == null || 
-                NPCType.NPCTypes == null ||
-                !NPCType.NPCTypes.TryGetValue(npc.NPCType, out npcSettings))
+                NPCType.NPCTypes == null || npc.Colony == null ||
+                !NPCType.NPCTypes.TryGetValue(job.NPCType, out npcSettings))
             {
                 return;
             }
-
+            
             List<Recipe> recipes;
 
-            Log.Write("AddProducerconsumer: KeyName = {0}", npcSettings.KeyName);
-
             bool found = ServerManager.RecipeStorage.TryGetRecipes(npcSettings.KeyName, out recipes);
-            
-            Log.Write("AddProducerconsumer: Found = {0}", found);
 
             if(found)
             {
-                foreach(var recipe in recipes)
+                var colonyStats = GetColonyStats(npc.Colony);
+                foreach (var recipe in recipes)
                 {
-                    Log.Write("AddProducerconsumer: Requirements:");
                     foreach(var requirement in recipe.Requirements)
                     {
-                        Log.Write("{0}: {1}", requirement.Type, requirement.Amount);
+                        colonyStats.GetTimedItemStats(requirement.Type).AddConsumer(npc.ID);
                     }
-                    Log.Write("AddProducerconsumer: Results:");
                     foreach (var result in recipe.Results)
                     {
-                        Log.Write("{0}: {1}", result.Type, result.Amount);
+                        colonyStats.GetTimedItemStats(result.Type).AddProducer(npc.ID);
                     }
                 }
             }
         }
 
-        // TODO
         static void RemoveProducerConsumer(NPCBase npc, IJob job)
         {
             INPCTypeSettings npcSettings;
 
             if (npc == null || job == null ||
                 ServerManager.RecipeStorage == null ||
-                NPCType.NPCTypes == null ||
-                !NPCType.NPCTypes.TryGetValue(npc.NPCType, out npcSettings))
+                NPCType.NPCTypes == null || npc.Colony == null ||
+                !NPCType.NPCTypes.TryGetValue(job.NPCType, out npcSettings))
             {
                 return;
             }
 
             List<Recipe> recipes;
 
-            Log.Write("RemoveProducerConsumer: KeyName = {0}", npcSettings.KeyName);
-
             bool found = ServerManager.RecipeStorage.TryGetRecipes(npcSettings.KeyName, out recipes);
-
-            Log.Write("RemoveProducerConsumer: Found = {0}", found);
 
             if (found)
             {
+                var colonyStats = GetColonyStats(npc.Colony);
                 foreach (var recipe in recipes)
                 {
-                    Log.Write("RemoveProducerConsumer: Requirements:");
                     foreach (var requirement in recipe.Requirements)
                     {
-                        Log.Write("{0}: {1}", requirement.Type, requirement.Amount);
+                        colonyStats.GetTimedItemStats(requirement.Type).RemoveConsumer(npc.ID);
                     }
-                    Log.Write("RemoveProducerConsumer: Results:");
                     foreach (var result in recipe.Results)
                     {
-                        Log.Write("{0}: {1}", result.Type, result.Amount);
+                        colonyStats.GetTimedItemStats(result.Type).RemoveProducer(npc.ID);
                     }
                 }
             }
         }
 
-        [ModCallback(EModCallbackType.OnNPCDied, "OnNPCDied", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnNPCDied, "grasmanek94.Statistics.OnNPCDied", float.MaxValue)]
         static void OnNPCDied(NPCBase npc)
         {
             if (npc == null || npc.Colony == null)
@@ -175,7 +172,7 @@ namespace grasmanek94.Statistics
             RemoveProducerConsumer(npc, npc.Job);
         }
 
-        [ModCallback(EModCallbackType.OnNPCLoaded, "OnNPCLoaded", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnNPCLoaded, "grasmanek94.Statistics.OnNPCLoaded", float.MaxValue)]
         static void OnNPCLoaded(NPCBase npc, JSONNode json)
         {
             if (npc == null || npc.Colony == null)
@@ -183,10 +180,13 @@ namespace grasmanek94.Statistics
                 return;
             }
 
+            ColonyStatistics stats = GetColonyStats(npc.Colony);
+            stats.NPCProduce();
+
             AddProducerConsumer(npc, npc.Job);
         }
 
-        [ModCallback(EModCallbackType.OnNPCRecruited, "OnNPCRecruited", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnNPCRecruited, "grasmanek94.Statistics.OnNPCRecruited", float.MaxValue)]
         static void OnNPCRecruited(NPCBase npc)
         {
             if (npc == null || npc.Colony == null)
@@ -196,9 +196,11 @@ namespace grasmanek94.Statistics
 
             ColonyStatistics stats = GetColonyStats(npc.Colony);
             stats.NPCProduce();
+
+            AddProducerConsumer(npc, npc.Job);
         }
 
-        [ModCallback(EModCallbackType.OnNPCJobChanged, "OnNPCJobChanged", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnNPCJobChanged, "grasmanek94.Statistics.OnNPCJobChanged", float.MaxValue)]
         static void OnNPCJobChanged(ValueTuple<NPCBase, IJob, IJob> data)
         {
             NPCBase npc = data.Item1;
@@ -214,17 +216,9 @@ namespace grasmanek94.Statistics
             AddProducerConsumer(npc, newJob);
         }
 
-        [ModCallback(EModCallbackType.OnNPCGathered, "OnNPCGathered", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnNPCGathered, "grasmanek94.Statistics.OnNPCGathered", float.MaxValue)]
         static void OnNPCGathered(IJob job, Pipliz.Vector3Int pos, List<ItemTypes.ItemTypeDrops> items)
         {
-            if (items != null)
-            {
-                foreach (var item in items)
-                {
-                    Log.Write("OnNPCGathered {0} {1}", item.Type, item.Amount);
-                }
-            }
-
             if (job == null || job.NPC == null || job.NPC.Colony == null || items == null)
             {
                 return;
@@ -240,17 +234,9 @@ namespace grasmanek94.Statistics
             }
         }
 
-        [ModCallback(EModCallbackType.OnNPCCraftedRecipe, "OnNPCCraftedRecipe", float.MaxValue)]
+        [ModCallback(EModCallbackType.OnNPCCraftedRecipe, "grasmanek94.Statistics.OnNPCCraftedRecipe", float.MaxValue)]
         static void OnNPCCraftedRecipe(IJob job, Recipe recipe, List<RecipeResult> result)
         {
-            if (result != null)
-            {
-                foreach (var item in result)
-                {
-                    Log.Write("OnNPCCraftedRecipe {0} {1}", item.Type, item.Amount);
-                }
-            }
-
             if (job == null || job.NPC == null || job.NPC.Colony == null)
             {
                 return;
@@ -286,7 +272,7 @@ namespace grasmanek94.Statistics
         // That would be actualy more accurate than Crafted/Gathered, because these callbacks are called before the items are in the inventory
         // .. which means that if an NPC dies it's not accounted for correctly? but... is is much easier to keep track of recipes this way..
         // or process the NPC inventory on death.. but then how do we know if the NPC got it from the stockpile (Consumer) or produced it (Producer)? 
-        // is the Job still valid?
+        // is the Job still valid? and looping al items to check the hashSets would be kinda inneficient.. maybe use the global statistic? But that's per item haha
 
         public static ColonyStatistics GetColonyStats(Colony colony)
         {
