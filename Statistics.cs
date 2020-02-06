@@ -30,20 +30,21 @@ namespace grasmanek94.Statistics
 
         static string PrintSingleStat(float value)
         {
-            if(value < 1.0f)
+            float absValue = Mathf.Abs(value);
+            if(absValue < 1.0f)
             {
-                return value.ToString("0.0##");
+                return value.ToString("0.00");
             }
-            if (value < 10.0f)
+            if (absValue < 10.0f)
             {
-                return value.ToString("0.0#");
+                return value.ToString("0.0");
             }
-            return value.ToString();
+            return value.ToString("0");
         }
 
         static void PrintStatistic(ConstructTooltipUIData data, ItemStatistics stat, bool allTime)
         {
-            string span = "";
+            string span;
 
             if (!allTime)
             {
@@ -51,24 +52,24 @@ namespace grasmanek94.Statistics
             }
             else
             {
-                span = "This session average:";
+                span = "Since world load:";
             }
 
             data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
 
             data.menu.Items.Add(new Label(new LabelData(span, TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData("Created " + PrintSingleStat(stat.AverageProduced) + ", Used " + PrintSingleStat(stat.AverageConsumed), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData(PrintSingleStat(stat.AverageProducers) + " producers, " + PrintSingleStat(stat.AverageConsumers) + " consumers", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData("Stock " + PrintSingleStat(stat.AverageInventoryAdded) + " added, " + PrintSingleStat(stat.AverageInventoryRemoved) + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Created " + PrintSingleStat(stat.AverageProduced) + ", Used " + PrintSingleStat(stat.AverageConsumed), TextAnchor.MiddleLeft, 13, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData(PrintSingleStat(stat.AverageProducers) + " producers, " + PrintSingleStat(stat.AverageConsumers) + " consumers", TextAnchor.MiddleLeft, 13, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Stock " + PrintSingleStat(stat.AverageInventoryAdded) + " added, " + PrintSingleStat(stat.AverageInventoryRemoved) + " removed", TextAnchor.MiddleLeft, 13, LabelData.ELocalizationType.Sentence), -1));
             
             if(stat.TradedIn != 0 || stat.TradedOut != 0)
             {
-                data.menu.Items.Add(new Label(new LabelData("Trade +" + PrintSingleStat(stat.AverageTradedIn) + " / -" + PrintSingleStat(stat.AverageTradedOut), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Trade +" + PrintSingleStat(stat.AverageTradedIn) + " / -" + PrintSingleStat(stat.AverageTradedOut), TextAnchor.MiddleLeft, 13, LabelData.ELocalizationType.Sentence), -1));
             }
 
             if(stat.UsedForFood != 0)
             {
-                data.menu.Items.Add(new Label(new LabelData("Food Use: " + PrintSingleStat(stat.AverageUsedForFood), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Food Use: " + PrintSingleStat(stat.AverageUsedForFood), TextAnchor.MiddleLeft, 13, LabelData.ELocalizationType.Sentence), -1));
             }
         }
 
