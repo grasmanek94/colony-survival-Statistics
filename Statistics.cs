@@ -80,7 +80,7 @@ namespace grasmanek94.Statistics
                 PrintStatistic(data, stat, false);
             }
 
-            PrintStatistic(data, stats.AllTimeStatistics, false);
+            PrintStatistic(data, stats.AllTimeStatistics, true);
         }
 
         // TODO
