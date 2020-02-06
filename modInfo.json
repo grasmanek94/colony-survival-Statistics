@@ -9,7 +9,7 @@
 		"name": "grasmanek94.Statistics",
 		"version": "0.0.1",
 		"website": "https://github.com/grasmanek94/colony-survival-Statistics",
-		"about": "Shows additional statistics (consumption/production etc)",
+		"about": "Shows additional statistics (consumption/production etc) when hovering over items",
 		"patchnotes": [
 			{
 				"version": "0.0.1.0",
