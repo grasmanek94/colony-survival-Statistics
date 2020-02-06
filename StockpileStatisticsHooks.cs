@@ -193,57 +193,6 @@ namespace grasmanek94.Statistics
 		}
 	}
 
-	[HarmonyPatch(typeof(ItemConfig))]
-	[HarmonyPatch("OnLuxuryVisit")]
-	public class ItemConfigHookOnLuxuryVisit
-	{
-		public static bool isFood;
-
-		static void Prefix(ItemConfig __instance, Colony colony, float hoursSinceShop)
-		{
-			isFood = true;
-		}
-
-		static void Postfix(ItemConfig __instance, Colony colony, float hoursSinceShop)
-		{
-			isFood = false;
-		}
-	}
-
-	[HarmonyPatch(typeof(ItemConfig))]
-	[HarmonyPatch("OnFoodVisit")]
-	public class ItemConfigHookOnFoodVisit
-	{
-		public static bool isFood;
-
-		static void Prefix(ItemConfig __instance, Colony colony, float foodDays, ref float foodTaken)
-		{
-			isFood = true;
-		}
-
-		static void Postfix(ItemConfig __instance, Colony colony, float foodDays, ref float foodTaken)
-		{
-			isFood = false;
-		}
-	}
-
-	[HarmonyPatch(typeof(BuilderBasic))]
-	[HarmonyPatch("DoJob")]
-	public class BuilderBasicHookDoJob
-	{
-		public static NPCBase npc = null;
-
-		static void Prefix(ItemConfig __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
-		{
-			npc = job.NPC;
-		}
-
-		static void Postfix(ItemConfig __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
-		{
-			npc = null;
-		}
-	}
-
 	[HarmonyPatch(typeof(Rule))]
 	[HarmonyPatch("TryExecute")]
 	public class RuleHookTryExecute
@@ -258,6 +207,57 @@ namespace grasmanek94.Statistics
 		static void Postfix(Rule __instance, ref float tradePower)
 		{
 			trading = false;
+		}
+	}
+
+	[HarmonyPatch(typeof(BuilderBasic))]
+	[HarmonyPatch("DoJob")]
+	public class BuilderBasicHookDoJob
+	{
+		public static NPCBase npc = null;
+
+		static void Prefix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
+		{
+			npc = job.NPC;
+		}
+
+		static void Postfix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
+		{
+			npc = null;
+		}
+	}
+
+	[HarmonyPatch(typeof(ItemConfig))]
+	[HarmonyPatch("OnFoodVisit")]
+	public class ItemConfigHookOnFoodVisit
+	{
+		public static bool isFood;
+
+		static void Prefix(Colony colony, float foodDays, ref float foodTaken)
+		{
+			isFood = true;
+		}
+
+		static void Postfix(Colony colony, float foodDays, ref float foodTaken)
+		{
+			isFood = false;
+		}
+	}
+
+	[HarmonyPatch(typeof(ItemConfig))]
+	[HarmonyPatch("OnLuxuryVisit")]
+	public class ItemConfigHookOnLuxuryVisit
+	{
+		public static bool isFood;
+
+		static void Prefix(Colony colony, float hoursSinceShop)
+		{
+			isFood = true;
+		}
+
+		static void Postfix(Colony colony, float hoursSinceShop)
+		{
+			isFood = false;
 		}
 	}
 
