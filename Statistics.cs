@@ -48,18 +48,18 @@ namespace grasmanek94.Statistics
             data.menu.Items.Add(new Line(Color.white, 2, -1, 10, 2));
 
             data.menu.Items.Add(new Label(new LabelData(span, TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData("Created " + stat.AverageProduced.ToString(".0#") + ", Used " + stat.AverageConsumed.ToString(".0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData(stat.AverageProducers.ToString(".0#") + " producers, " + stat.AverageConsumers.ToString(".0#") + " consumers", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
-            data.menu.Items.Add(new Label(new LabelData("Stock " + stat.AverageInventoryAdded.ToString(".0#") + " added, " + stat.AverageInventoryRemoved.ToString(".0#") + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Created " + stat.AverageProduced.ToString("0.0#") + ", Used " + stat.AverageConsumed.ToString("0.0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData(stat.AverageProducers.ToString("0.0#") + " producers, " + stat.AverageConsumers.ToString("0.0#") + " consumers", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+            data.menu.Items.Add(new Label(new LabelData("Stock " + stat.AverageInventoryAdded.ToString("0.0#") + " added, " + stat.AverageInventoryRemoved.ToString("0.0#") + " removed", TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             
             if(stat.TradedIn != 0 || stat.TradedOut != 0)
             {
-                data.menu.Items.Add(new Label(new LabelData("Trade +" + stat.AverageTradedIn.ToString(".0#") + " / -" + stat.AverageTradedOut.ToString(".0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Trade +" + stat.AverageTradedIn.ToString("0.0#") + " / -" + stat.AverageTradedOut.ToString("0.0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             }
 
             if(stat.UsedForFood != 0)
             {
-                data.menu.Items.Add(new Label(new LabelData("Food Use: " + stat.AverageUsedForFood.ToString(".0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
+                data.menu.Items.Add(new Label(new LabelData("Food Use: " + stat.AverageUsedForFood.ToString("0.0#"), TextAnchor.MiddleLeft, 17, LabelData.ELocalizationType.Sentence), -1));
             }
         }
 
