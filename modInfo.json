@@ -1,23 +1,28 @@
 [
 	{
 		"compatibleversions": [
-			"0.7.1",
-			"0.7.2"
+      "0.8.1"
 		],
 		"enabled": true,
 		"marksgamemodded": true,
 		"name": "grasmanek94.Statistics",
-		"version": "0.0.1",
+		"version": "0.0.2",
 		"website": "https://github.com/grasmanek94/colony-survival-Statistics",
 		"about": "Shows additional statistics (consumption/production etc) when hovering over items",
-		"patchnotes": [
-			{
-				"version": "0.0.1.0",
-				"notes": [
-					"Initial Release"
-				]
-			}
-		],
+    "patchnotes": [
+      {
+        "version": "0.0.1.0",
+        "notes": [
+          "Initial Release"
+        ]
+      },
+      {
+        "version": "0.0.2.0",
+        "notes": [
+          "Update for game version 0.8.1"
+        ]
+      }
+    ],
 		"dllpath": "grasmanek94.Statistics.dll"
 	}
 ]

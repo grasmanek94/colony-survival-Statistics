@@ -9,23 +9,25 @@ using Recipes;
 using NPC;
 using System;
 using Pipliz.JSON;
-using Harmony;
 using Pipliz;
+using System.Reflection;
+using HarmonyLib;
+using ModLoaderInterfaces;
 
 namespace grasmanek94.Statistics
 {
     [ModManager]
-    public static class Statistics
+    public class Statistics : IOnConstructTooltipUI, IOnAssemblyLoaded, IOnNPCDied, IOnNPCLoaded, IOnNPCJobChanged, IOnNPCRecruited, IOnNPCCraftedRecipe
     {
         static Dictionary<Colony, ColonyStatistics> colonyStats;
 
-        [ModCallback(EModCallbackType.OnAssemblyLoaded, "grasmanek94.Statistics.OnAssemblyLoaded", float.MaxValue)]
-        static void OnAssemblyLoaded(string assemblyPath)
+        public void OnAssemblyLoaded(string assemblyPath)
         {
             colonyStats = new Dictionary<Colony, ColonyStatistics>();
 
-            var harmony = HarmonyInstance.Create("grasmanek94.Statistics");
-            harmony.PatchAll();
+            var harmony = new Harmony("grasmanek94.Statistics");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+
         }
 
         static string PrintSingleStat(float value)
@@ -73,15 +75,14 @@ namespace grasmanek94.Statistics
             }
         }
 
-        [ModCallback(EModCallbackType.OnConstructTooltipUI, "grasmanek94.Statistics.OnConstructTooltipUI", float.MaxValue)]
-        static void OnConstructTooltipUI(ConstructTooltipUIData data)
+        public void OnConstructTooltipUI(Players.Player player, ConstructTooltipUIData data)
         {
-            if(data.hoverType != ETooltipHoverType.Item)
+            if (data.hoverType != ETooltipHoverType.Item)
             {
                 return;
             }
-
-            TimedItemStatistics stats = GetColonyStats(data.player.ActiveColony).GetTimedItemStats(data.hoverItem);
+            
+            TimedItemStatistics stats = GetColonyStats(player.ActiveColony).GetTimedItemStats(data.hoverItem);
       
             var statlist = stats.Averages();
 
@@ -159,8 +160,7 @@ namespace grasmanek94.Statistics
             }
         }
 
-        [ModCallback(EModCallbackType.OnNPCDied, "grasmanek94.Statistics.OnNPCDied", float.MaxValue)]
-        static void OnNPCDied(NPCBase npc)
+        public void OnNPCDied(NPCBase npc)
         {
             if (npc == null || npc.Colony == null)
             {
@@ -173,8 +173,7 @@ namespace grasmanek94.Statistics
             RemoveProducerConsumer(npc, npc.Job);
         }
 
-        [ModCallback(EModCallbackType.OnNPCLoaded, "grasmanek94.Statistics.OnNPCLoaded", float.MaxValue)]
-        static void OnNPCLoaded(NPCBase npc, JSONNode json)
+        public void OnNPCLoaded(NPCBase npc, JSONNode json)
         {
             if (npc == null || npc.Colony == null)
             {
@@ -187,8 +186,7 @@ namespace grasmanek94.Statistics
             AddProducerConsumer(npc, npc.Job);
         }
 
-        [ModCallback(EModCallbackType.OnNPCRecruited, "grasmanek94.Statistics.OnNPCRecruited", float.MaxValue)]
-        static void OnNPCRecruited(NPCBase npc)
+        public void OnNPCRecruited(NPCBase npc)
         {
             if (npc == null || npc.Colony == null)
             {
@@ -201,8 +199,7 @@ namespace grasmanek94.Statistics
             AddProducerConsumer(npc, npc.Job);
         }
 
-        [ModCallback(EModCallbackType.OnNPCJobChanged, "grasmanek94.Statistics.OnNPCJobChanged", float.MaxValue)]
-        static void OnNPCJobChanged(ValueTuple<NPCBase, IJob, IJob> data)
+        public void OnNPCJobChanged(ValueTuple<NPCBase, IJob, IJob> data)
         {
             NPCBase npc = data.Item1;
             IJob oldJob = data.Item2;
@@ -217,8 +214,7 @@ namespace grasmanek94.Statistics
             AddProducerConsumer(npc, newJob);
         }
 
-        [ModCallback(EModCallbackType.OnNPCGathered, "grasmanek94.Statistics.OnNPCGathered", float.MaxValue)]
-        static void OnNPCGathered(IJob job, Pipliz.Vector3Int pos, List<ItemTypes.ItemTypeDrops> items)
+        public void OnNPCGathered(IJob job, Pipliz.Vector3Int pos, List<ItemTypes.ItemTypeDrops> items)
         {
             if (job == null || job.NPC == null || job.NPC.Colony == null || items == null)
             {
@@ -235,8 +231,7 @@ namespace grasmanek94.Statistics
             }
         }
 
-        [ModCallback(EModCallbackType.OnNPCCraftedRecipe, "grasmanek94.Statistics.OnNPCCraftedRecipe", float.MaxValue)]
-        static void OnNPCCraftedRecipe(IJob job, Recipe recipe, List<RecipeResult> result)
+        public void OnNPCCraftedRecipe(IJob job, Recipe recipe, List<RecipeResult> result)
         {
             if (job == null || job.NPC == null || job.NPC.Colony == null)
             {
@@ -291,5 +286,6 @@ namespace grasmanek94.Statistics
 
             return stats;
         }
+
     }
 }

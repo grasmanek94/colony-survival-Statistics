@@ -1,15 +1,15 @@
-﻿using Harmony;
-using System;
+﻿using System;
 using Pipliz.Collections;
 using Pipliz;
 using Jobs.Implementations;
 using Jobs;
 using NPC;
 using static Jobs.BlockFarmAreaJobDefinition;
-using Happiness;
 using Jobs.Implementations.Construction.Types;
 using Jobs.Implementations.Construction;
+using HarmonyLib;
 using static ColonyTrading;
+using Assets.ColonyPointUpgrades;
 
 namespace grasmanek94.Statistics
 {
@@ -56,21 +56,21 @@ namespace grasmanek94.Statistics
 		}
 	}
 
-	[HarmonyPatch(typeof(Stockpile))]
-	[HarmonyPatch("TryRemoveFood")]
-	public class StockpileHookTryRemoveFood
-	{
+	[HarmonyPatch(typeof(ColonyShopVisitTracker))]
+	[HarmonyPatch("OnVisit")]
+	public class ColonyShopVisitTrackerHookOnVisit
+    {
 		public  static Stockpile inFunctionStockpile = null;
 		public static bool isFood;
 
-		static void Prefix(Stockpile __instance, ref float currentFood, float desiredFoodAddition)
+		static void Prefix(ref NPCBase npc, ref bool gotFood)
 		{
 			// Log.WriteWarning("StockpileHookTryRemoveFood::Prefix");
-			inFunctionStockpile = __instance;
+			inFunctionStockpile = npc.Colony.Stockpile;
 			isFood = true;
 		}
 
-		static void Postfix(Stockpile __instance, bool __result, ref float currentFood, float desiredFoodAddition)
+		static void Postfix(ref NPCBase npc, ref bool gotFood)
 		{
 			// Log.WriteWarning("StockpileHookTryRemoveFood::Postfix");
 			inFunctionStockpile = null;
@@ -84,7 +84,7 @@ namespace grasmanek94.Statistics
 	{
 		static void Prefix(SortedList<ushort, int> __instance, int index, int amount)
 		{
-			Stockpile stockpile = StockpileHookTryRemoveFood.inFunctionStockpile;
+			Stockpile stockpile = ColonyShopVisitTrackerHookOnVisit.inFunctionStockpile;
 			if (stockpile == null)
 			{
 				// Log.Write("SortedListHookRemoveAt INVALID STOCKPILE");
@@ -108,7 +108,7 @@ namespace grasmanek94.Statistics
 	{
 		static void Prefix(SortedList<ushort, int> __instance, int index, int val)
 		{
-			Stockpile stockpile = StockpileHookTryRemoveFood.inFunctionStockpile;
+			Stockpile stockpile = ColonyShopVisitTrackerHookOnVisit.inFunctionStockpile;
 			if (stockpile == null)
 			{
 				// Log.Write("SortedListHookSetValueAtIndex INVALID STOCKPILE");
@@ -252,25 +252,6 @@ namespace grasmanek94.Statistics
 		}
 	}
 
-	[HarmonyPatch(typeof(ItemConfig))]
-	[HarmonyPatch("TryFetchMore")]
-	public class ItemConfigHookTryFetchMore
-	{
-		public static bool isFood;
-
-		static void Prefix(Colony colony, float multiplier)
-		{
-			// Log.WriteWarning("ItemConfigHookTryFetchMore::Prefix");
-			isFood = true;
-		}
-
-		static void Postfix(Colony colony, float multiplier)
-		{
-			// Log.WriteWarning("ItemConfigHookTryFetchMore::Postfix");
-			isFood = false;
-		}
-	}
-
 	public class InventoryStatistics
 	{
 		public static void AddInventory(Colony colony, ushort type, int amount)
@@ -286,8 +267,7 @@ namespace grasmanek94.Statistics
 			RemoveConsumerAddProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
 
-			if (StockpileHookTryRemoveFood.isFood ||
-				ItemConfigHookTryFetchMore.isFood)
+			if (ColonyShopVisitTrackerHookOnVisit.isFood)
 			{
 				// wonder if this gets ever called ? It shouldn't though
 				itemStats.UseAsFood(-amount);
@@ -312,8 +292,7 @@ namespace grasmanek94.Statistics
 			AddConsumerRemoveProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			AddConsumerRemoveProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
 
-			if (StockpileHookTryRemoveFood.isFood ||
-				ItemConfigHookTryFetchMore.isFood)
+			if (ColonyShopVisitTrackerHookOnVisit.isFood)
 			{
 				itemStats.UseAsFood(amount);
 			}
