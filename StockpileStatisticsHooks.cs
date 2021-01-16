@@ -10,10 +10,13 @@ using Jobs.Implementations.Construction;
 using HarmonyLib;
 using static ColonyTrading;
 using Assets.ColonyPointUpgrades;
+using System.Reflection;
 
 namespace grasmanek94.Statistics
 {
-	[HarmonyPatch(typeof(Stockpile))]
+    //Stockpile
+
+    [HarmonyPatch(typeof(Stockpile))]
 	[HarmonyPatch("Add")]
 	[HarmonyPatch(new Type[] { typeof(ushort), typeof(int) })]
 	public class StockpileHookAdd
@@ -62,20 +65,24 @@ namespace grasmanek94.Statistics
     {
 		public  static Stockpile inFunctionStockpile = null;
 		public static bool isFood;
+        public static NPCBase npc = null;
 
-		static void Prefix(ref NPCBase npc, ref bool gotFood)
+        static void Prefix(NPCBase npc, ref bool gotFood)
 		{
 			// Log.WriteWarning("StockpileHookTryRemoveFood::Prefix");
 			inFunctionStockpile = npc.Colony.Stockpile;
 			isFood = true;
-		}
+            ColonyShopVisitTrackerHookOnVisit.npc = npc;
 
-		static void Postfix(ref NPCBase npc, ref bool gotFood)
+        }
+
+		static void Postfix(NPCBase npc, ref bool gotFood)
 		{
 			// Log.WriteWarning("StockpileHookTryRemoveFood::Postfix");
 			inFunctionStockpile = null;
 			isFood = false;
-		}
+            ColonyShopVisitTrackerHookOnVisit.npc = null;
+        }
 	}
 
 	[HarmonyPatch(typeof(SortedList<ushort, int>))]
@@ -128,14 +135,16 @@ namespace grasmanek94.Statistics
 
 			if (difference > 0)
 			{
-				InventoryStatistics.RemoveInventory(stockpile.Owner, type, val);
+				InventoryStatistics.RemoveInventory(stockpile.Owner, type, difference);
 			}
 			else
 			{
-				InventoryStatistics.AddInventory(stockpile.Owner, type, -val);
+				InventoryStatistics.AddInventory(stockpile.Owner, type, -difference);
 			}
 		}
 	}
+
+    //Jobs
 
 	[HarmonyPatch(typeof(ScientistJobSettings))]
 	[HarmonyPatch("OnNPCAtJob")]
@@ -174,7 +183,6 @@ namespace grasmanek94.Statistics
 			npc = null;
 		}
 	}
-
 	
 	[HarmonyPatch(typeof(BlockFarmAreaJob))]
 	[HarmonyPatch("OnNPCAtJob")]
@@ -214,7 +222,28 @@ namespace grasmanek94.Statistics
 		}
 	}
 
-	[HarmonyPatch(typeof(Rule))]
+    [HarmonyPatch(typeof(BuilderBasic))]
+    [HarmonyPatch("DoJob")]
+    public class BuilderBasicHookDoJob
+    {
+        public static NPCBase npc = null;
+
+        static void Prefix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
+        {
+            // Log.WriteWarning("BuilderBasicHookDoJob::Prefix");
+            npc = job.NPC;
+        }
+
+        static void Postfix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
+        {
+            // Log.WriteWarning("BuilderBasicHookDoJob::Postfix");
+            npc = null;
+        }
+    }
+
+    //Trading
+
+    [HarmonyPatch(typeof(Rule))]
 	[HarmonyPatch("TryExecute")]
 	public class RuleHookTryExecute
 	{
@@ -233,25 +262,6 @@ namespace grasmanek94.Statistics
 		}
 	}
 
-	[HarmonyPatch(typeof(BuilderBasic))]
-	[HarmonyPatch("DoJob")]
-	public class BuilderBasicHookDoJob
-	{
-		public static NPCBase npc = null;
-
-		static void Prefix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
-		{
-			// Log.WriteWarning("BuilderBasicHookDoJob::Prefix");
-			npc = job.NPC;
-		}
-
-		static void Postfix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
-		{
-			// Log.WriteWarning("BuilderBasicHookDoJob::Postfix");
-			npc = null;
-		}
-	}
-
 	public class InventoryStatistics
 	{
 		public static void AddInventory(Colony colony, ushort type, int amount)
@@ -266,8 +276,9 @@ namespace grasmanek94.Statistics
 			RemoveConsumerAddProducer(itemStats, BlockFarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			RemoveConsumerAddProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
+            RemoveConsumerAddProducer(itemStats, ColonyShopVisitTrackerHookOnVisit.npc, amount);
 
-			if (ColonyShopVisitTrackerHookOnVisit.isFood)
+            if (ColonyShopVisitTrackerHookOnVisit.isFood)
 			{
 				// wonder if this gets ever called ? It shouldn't though
 				itemStats.UseAsFood(-amount);
@@ -286,13 +297,14 @@ namespace grasmanek94.Statistics
 
 			itemStats.RemoveInventory(amount);
 
-			AddConsumerRemoveProducer(itemStats, ScientistJobSettingsHookOnNPCAtJob.npc, amount);
+            AddConsumerRemoveProducer(itemStats, ScientistJobSettingsHookOnNPCAtJob.npc, amount);
 			AddConsumerRemoveProducer(itemStats, GuardJobSettingsHookShootAtTarget.npc, amount);
 			AddConsumerRemoveProducer(itemStats, BlockFarmAreaJobHookOnNPCAtJob.npc, amount);
 			AddConsumerRemoveProducer(itemStats, FarmAreaJobHookOnNPCAtJob.npc, amount);
 			AddConsumerRemoveProducer(itemStats, BuilderBasicHookDoJob.npc, amount);
+            AddConsumerRemoveProducer(itemStats, ColonyShopVisitTrackerHookOnVisit.npc, amount);
 
-			if (ColonyShopVisitTrackerHookOnVisit.isFood)
+            if (ColonyShopVisitTrackerHookOnVisit.isFood)
 			{
 				itemStats.UseAsFood(amount);
 			}
