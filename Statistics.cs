@@ -17,7 +17,7 @@ using ModLoaderInterfaces;
 namespace grasmanek94.Statistics
 {
     [ModManager]
-    public class Statistics : IOnConstructTooltipUI, IOnAssemblyLoaded, IOnNPCDied, IOnNPCLoaded, IOnNPCJobChanged, IOnNPCRecruited, IOnNPCCraftedRecipe
+    public class Statistics : IOnConstructTooltipUI, IOnAssemblyLoaded, IOnNPCDied, IOnNPCLoaded, IOnNPCJobChanged, IOnNPCRecruited, IOnNPCCraftedRecipe, IOnNPCGathered
     {
         static Dictionary<Colony, ColonyStatistics> colonyStats;
 
