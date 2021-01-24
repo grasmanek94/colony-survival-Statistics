@@ -1,0 +1,10 @@
+﻿#Contributions to the Colony Survival Statistics mod
+
+## Creator & Maintainer
+
+* grasmanek94
+
+## Contributers
+
+* nickmcski 
+  * Updated mod to game version 0.8.1
