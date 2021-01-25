@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace grasmanek94.Statistics
 {
@@ -12,13 +14,10 @@ namespace grasmanek94.Statistics
         private List<ItemStatistics> averages;
 
         private int _currentPeriod;
-        private int CurrentPeriod 
-        { 
-            get { return _currentPeriod; } 
-            set 
-            { 
-                _currentPeriod = value % MaxPeriods;
-            } 
+        private int CurrentPeriod
+        {
+            get { return _currentPeriod; }
+            set { _currentPeriod = value % MaxPeriods; }
         }
 
         private int[] nextAverages;
@@ -36,7 +35,7 @@ namespace grasmanek94.Statistics
 
         public int GetPeriod()
         {
-            return (int)(TimeCycle.TotalTime.Value.TotalMinutes / GamePeriodLengthInMinutes) % MaxPeriods;
+            return Math.Min(Math.Max((int)(TimeCycle.TotalTime.Value.TotalMinutes / GamePeriodLengthInMinutes) % MaxPeriods, 0), MaxPeriods);
         }
 
         public TimedItemStatistics()
@@ -48,7 +47,7 @@ namespace grasmanek94.Statistics
             averages = new List<ItemStatistics>();
 
             CurrentPeriod = GetPeriod();
-            for(int i = 0; i < MaxPeriods; ++i)
+            for (int i = 0; i < MaxPeriods; ++i)
             {
                 timedItemStatistics[i] = new ItemStatistics();
             }
@@ -67,7 +66,7 @@ namespace grasmanek94.Statistics
 
         private void PerformPeriodUpdate(bool forceDirty = false)
         {
-            if(forceDirty)
+            if (forceDirty)
             {
                 Dirty = true;
             }
@@ -77,7 +76,8 @@ namespace grasmanek94.Statistics
             {
                 while (CurrentPeriod != period)
                 {
-                    timedItemStatistics[++CurrentPeriod].Reset();
+                    ++CurrentPeriod;
+                    timedItemStatistics[CurrentPeriod].Reset();
                 }
                 Dirty = true;
                 CurrentStatistics = timedItemStatistics[CurrentPeriod];
@@ -163,12 +163,12 @@ namespace grasmanek94.Statistics
 
         public ItemStatistics Average(int lastPeriods)
         {
-            if(lastPeriods <= 0)
+            if (lastPeriods <= 0)
             {
                 return new ItemStatistics();
             }
 
-            if(lastPeriods > MaxPeriods)
+            if (lastPeriods > MaxPeriods)
             {
                 lastPeriods = MaxPeriods;
             }
@@ -180,7 +180,7 @@ namespace grasmanek94.Statistics
             while (--lastPeriods > 0)
             {
                 int adjusted_period = _currentPeriod - lastPeriods;
-                if(adjusted_period < 0)
+                if (adjusted_period < 0)
                 {
                     adjusted_period = MaxPeriods + adjusted_period;
                 }
@@ -195,7 +195,7 @@ namespace grasmanek94.Statistics
         {
             PerformPeriodUpdate();
 
-            if(!Dirty && averages != null)
+            if (!Dirty && averages != null)
             {
                 return averages;
             }
@@ -210,7 +210,7 @@ namespace grasmanek94.Statistics
 
             while (nextAverage < nextAverages.Length)
             {
-                if(stats.Periods >= nextAverages[nextAverage])
+                if (stats.Periods >= nextAverages[nextAverage])
                 {
                     ++nextAverage;
                     averages.Add(new ItemStatistics(stats));

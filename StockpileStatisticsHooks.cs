@@ -11,10 +11,34 @@ using HarmonyLib;
 using static ColonyTrading;
 using Assets.ColonyPointUpgrades;
 using System.Reflection;
-using static Jobs.Implementations.TemperateForesterDefinition;
 
 namespace grasmanek94.Statistics
 {
+    class DebugLog
+    {
+        public static void Write(string s)
+        {
+#if (DEBUG)
+            Log.WriteWarning(s);
+#endif
+        }
+
+        public static void Write(string s, bool something)
+        {
+            Write(s + " (" + something.ToString() + ")");
+        }
+
+        public static void Write(string s, string something)
+        {
+            Write(s + ": " + something);
+        }
+
+        public static void Write(string s, object something)
+        {
+            Write(s + " (" + (something == null ? "NULL" : "NOT NULL") + ")");
+        }
+    }
+
     //Stockpile
 
     [HarmonyPatch(typeof(Stockpile))]
@@ -26,11 +50,11 @@ namespace grasmanek94.Statistics
         {
             if (amount <= 0 || type <= 0 || __instance.Owner == null)
             {
-                // Log.Write("StockpileHookAdd INVALID");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name + ": INVALID");
                 return;
             }
 
-            // Log.WriteWarning("StockpileHookAdd");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             InventoryStatistics.AddInventory(__instance.Owner, type, amount);
         }
     }
@@ -44,18 +68,18 @@ namespace grasmanek94.Statistics
         {
             if (amount <= 0 || type <= 0 || __instance.Owner == null)
             {
-                // Log.Write("StockpileHookTryRemove INVALID");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name + ": INVALID");
                 return;
             }
 
             if (__result)
             {
-                // Log.WriteWarning("StockpileHookTryRemove TRUE");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, __result);
                 InventoryStatistics.RemoveInventory(__instance.Owner, type, amount);
             }
             else
             {
-                // Log.WriteWarning("StockpileHookTryRemove FALSE");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, __result);
             }
         }
     }
@@ -65,47 +89,45 @@ namespace grasmanek94.Statistics
     public class ColonyShopVisitTrackerHookOnVisit
     {
         public static Stockpile inFunctionStockpile = null;
-        public static bool isFood;
         public static NPCBase npc = null;
 
         static void Prefix(NPCBase npc, ref bool gotFood)
         {
-            // Log.WriteWarning("StockpileHookTryRemoveFood::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, npc);
+
             inFunctionStockpile = npc.Colony.Stockpile;
-            isFood = true;
             ColonyShopVisitTrackerHookOnVisit.npc = npc;
 
         }
 
         static void Postfix(NPCBase npc, ref bool gotFood)
         {
-            // Log.WriteWarning("StockpileHookTryRemoveFood::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
+
             inFunctionStockpile = null;
-            isFood = false;
             ColonyShopVisitTrackerHookOnVisit.npc = null;
         }
     }
-
     [HarmonyPatch(typeof(SortedList<ushort, int>))]
     [HarmonyPatch("RemoveAt")]
     public class SortedListHookRemoveAt
     {
-        static void Prefix(SortedList<ushort, int> __instance, int index, int amount)
+        public static void Prefix(SortedList<ushort, int> __instance, int index, int amount)
         {
             Stockpile stockpile = ColonyShopVisitTrackerHookOnVisit.inFunctionStockpile;
             if (stockpile == null)
             {
-                // Log.Write("SortedListHookRemoveAt INVALID STOCKPILE");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, "INVALID SOTCKPILE");
                 return;
             }
 
             if (stockpile.Owner == null)
             {
-                // Log.Write("SortedListHookRemoveAt INVALID OWNER");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, "INVALID OWNER");
                 return;
             }
 
-            // Log.WriteWarning("SortedListHookRemoveAt");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             InventoryStatistics.RemoveInventory(stockpile.Owner, __instance.GetKeyAtIndex(index), amount);
         }
     }
@@ -119,17 +141,17 @@ namespace grasmanek94.Statistics
             Stockpile stockpile = ColonyShopVisitTrackerHookOnVisit.inFunctionStockpile;
             if (stockpile == null)
             {
-                // Log.Write("SortedListHookSetValueAtIndex INVALID STOCKPILE");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, "INVALID SOTKCPILE");
                 return;
             }
 
             if (stockpile.Owner == null)
             {
-                // Log.Write("SortedListHookSetValueAtIndex INVALID OWNER");
+                DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, "INVALID OWNER");
                 return;
             }
 
-            // Log.WriteWarning("SortedListHookSetValueAtIndex");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
 
             int difference = __instance.GetValueAtIndex(index) - val;
             ushort type = __instance.GetKeyAtIndex(index);
@@ -155,13 +177,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(ScientistJobSettingsHookOnNPCAtJob __instance, BlockJobInstance blockJobInstance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("ScientistJobSettingsHookOnNPCAtJob::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, blockJobInstance.NPC);
             npc = blockJobInstance.NPC;
         }
 
         static void Postfix(ScientistJobSettingsHookOnNPCAtJob __instance, BlockJobInstance blockJobInstance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("ScientistJobSettingsHookOnNPCAtJob::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             npc = null;
         }
     }
@@ -174,13 +196,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(GuardJobSettings __instance, GuardJobInstance instance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("GuardJobSettingsHookShootAtTarget::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, instance.NPC);
             npc = instance.NPC;
         }
 
         static void Postfix(GuardJobSettings __instance, GuardJobInstance instance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("GuardJobSettingsHookShootAtTarget::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             npc = null;
         }
     }
@@ -193,13 +215,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(BlockFarmAreaJob __instance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("BlockFarmAreaJobHookOnNPCAtJob::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, __instance.NPC);
             npc = __instance.NPC;
         }
 
         static void Postfix(BlockFarmAreaJob __instance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("BlockFarmAreaJobHookOnNPCAtJob::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             npc = null;
         }
     }
@@ -212,13 +234,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(FarmAreaJob __instance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("FarmAreaJobHookOnNPCAtJob::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, __instance.NPC);
             npc = __instance.NPC;
         }
 
         static void Postfix(FarmAreaJob __instance, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("FarmAreaJobHookOnNPCAtJob::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             npc = null;
         }
     }
@@ -231,13 +253,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("BuilderBasicHookDoJob::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, job.NPC);
             npc = job.NPC;
         }
 
         static void Postfix(BuilderBasic __instance, IIterationType iterationType, IAreaJob areaJob, ConstructionJobInstance job, ref NPCBase.NPCState state)
         {
-            // Log.WriteWarning("BuilderBasicHookDoJob::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             npc = null;
         }
     }
@@ -250,11 +272,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(AbstractAreaJob __instance, ref NPCBase.NPCState state)
         {
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, __instance.NPC);
             npc = __instance.NPC;
         }
 
         static void Postfix(AbstractAreaJob __instance, ref NPCBase.NPCState state)
         {
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             npc = null;
         }
     }
@@ -269,13 +293,13 @@ namespace grasmanek94.Statistics
 
         static void Prefix(Rule __instance, ref float tradePower)
         {
-            // Log.WriteWarning("RuleHookTryExecute::Prefix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             trading = true;
         }
 
         static void Postfix(Rule __instance, ref float tradePower)
         {
-            // Log.WriteWarning("RuleHookTryExecute::Postfix");
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name);
             trading = false;
         }
     }
@@ -284,6 +308,8 @@ namespace grasmanek94.Statistics
     {
         public static void AddInventory(Colony colony, ushort type, int amount)
         {
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, "Type: " + type.ToString() + ", Amount: " + amount.ToString());
+
             ColonyStatistics stats = Statistics.GetColonyStats(colony);
             TimedItemStatistics itemStats = stats.GetTimedItemStats(type);
 
@@ -297,7 +323,7 @@ namespace grasmanek94.Statistics
             RemoveConsumerAddProducer(itemStats, ColonyShopVisitTrackerHookOnVisit.npc, amount);
             RemoveConsumerAddProducer(itemStats, AbstractAreaJobHookOnNPCAtStockpile.npc, amount);
 
-            if (ColonyShopVisitTrackerHookOnVisit.isFood)
+            if (ItemTypes.GetType(type).ColonyPointsMeal > 0)
             {
                 // wonder if this gets ever called ? It shouldn't though
                 itemStats.UseAsFood(-amount);
@@ -311,6 +337,8 @@ namespace grasmanek94.Statistics
 
         public static void RemoveInventory(Colony colony, ushort type, int amount)
         {
+            DebugLog.Write(MethodBase.GetCurrentMethod().DeclaringType + "::" + MethodBase.GetCurrentMethod().Name, "Type: " + type.ToString() + ", Amount: " + amount.ToString());
+
             ColonyStatistics stats = Statistics.GetColonyStats(colony);
             TimedItemStatistics itemStats = stats.GetTimedItemStats(type);
 
@@ -324,7 +352,7 @@ namespace grasmanek94.Statistics
             AddConsumerRemoveProducer(itemStats, ColonyShopVisitTrackerHookOnVisit.npc, amount);
             AddConsumerRemoveProducer(itemStats, AbstractAreaJobHookOnNPCAtStockpile.npc, amount);
 
-            if (ColonyShopVisitTrackerHookOnVisit.isFood)
+            if (ItemTypes.GetType(type).ColonyPointsMeal > 0)
             {
                 itemStats.UseAsFood(amount);
             }

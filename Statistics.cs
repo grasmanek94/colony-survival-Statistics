@@ -9,7 +9,6 @@ using Recipes;
 using NPC;
 using System;
 using Pipliz.JSON;
-using Pipliz;
 using System.Reflection;
 using HarmonyLib;
 using ModLoaderInterfaces;
