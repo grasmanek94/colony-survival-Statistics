@@ -6,7 +6,7 @@
     "enabled": true,
     "marksgamemodded": true,
     "name": "grasmanek94.Statistics",
-    "version": "0.0.2",
+    "version": "2.8.1.5",
     "website": "https://github.com/grasmanek94/colony-survival-Statistics",
     "about": "Shows additional statistics (consumption/production etc) when hovering over items",
     "patchnotes": [
@@ -17,7 +17,7 @@
         ]
       },
       {
-        "version": "0.0.2.0",
+        "version": "2.8.1.5",
         "notes": [
           "Update for game version 0.8.1"
         ]
